@@ -1,0 +1,29 @@
+<header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a href="#" class="navbar-brand">
+                <img src="static/lost_coureur.png" height="40px"/>
+                <span class="fs-4">ELOrienteering</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#myNavbar1" aria-controls="myNavbar1" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="myNavbar1">
+                <ul class="nav nav-pills">
+                    <li class="nav-item"><a class="nav-link">Runners</a></li>
+                    <li class="nav-item"><a class="nav-link">About</a></li>
+                </ul>
+                <div class="lc-block">
+                    <!-- PLEASE NOTE: if your site is not in the domain root, change the 'action' attribute below with your site URL -->
+                    <form method="get" id="searchform" role="search" action="/">
+                        <label class="visually-hidden" for="s"> Search </label>
+                        <div class="input-group">
+                            <input class="field form-control" id="s" name="s" type="text" placeholder="Search..." value="">
+                            <input class="submit btn btn-primary" id="searchsubmit" name="submit" type="submit" value="Search">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
