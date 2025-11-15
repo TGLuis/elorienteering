@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+{% load static %}
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -62,32 +63,14 @@
     </style>
   </head>
   <body>
-    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container">
-                <a href="#" class="navbar-brand">
-                    <img src="static/lost_coureur.png" height="40px"/>
-                    <span class="fs-4">ELOrienteering</span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#myNavbar1" aria-controls="myNavbar1" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="myNavbar1">
-                    <ul class="nav nav-pills">
-                        <li class="nav-item"><a class="nav-link">Runners</a></li>
-                        <li class="nav-item"><a class="nav-link">About</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>        
-    </header>
+    {% include "header_classic.html" %}
     <main>
         <div id='elio' class="tenor-gif-embed" data-postid="12295526" data-share-method="host" data-aspect-ratio="1.59574" data-width="100%"><a href="https://tenor.com/view/elio-di-rupo-elio-ps-farles-mifel-coucou-charles-gif-12295526">Elio Di Rupo Elio GIF</a>from <a href="https://tenor.com/search/elio+di+rupo-gifs">Elio Di Rupo GIFs</a></div> 
         <div class="py-5 my-5 text-center">
             <h1>Error 404</h1>
             <h2>This is not the control you were looking for</h2>
-            <img src="static/lost_balise.png" id="lostbalise" class="img_lost" />
-            <img src="static/lost_homme.png" class="img_fixed"/>
+            <img src="{% static 'lost_balise.png' %}" id="lostbalise" class="img_lost" />
+            <img src="{% static 'lost_homme.png' %}" class="img_fixed"/>
         </div>
     </main>
     <footer class="mt-auto fixed-bottom">
