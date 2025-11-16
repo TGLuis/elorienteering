@@ -7,7 +7,8 @@ This project aims to do a classification based of elo calculations of the helga 
 ### Requirements before V1
 
 - [ ] paginations to have only 100 runners per page with an arrow to fetch the next/previous. (for load time perf)
-- [ ] about page to explain the project and reference github and helga.
+- [x] about page to explain the project and reference github and helga.
+- [ ] simple stat of page load to get an idea of the number of calls to this website.
 
 ### Short term
 

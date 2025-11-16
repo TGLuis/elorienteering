@@ -1,10 +1,11 @@
-<footer class="mt-auto">
+<footer class="mt-4">
     <div class="container">
+        {% load static %}
         <div class="row align-items-center">
             <div class="col mb-2">
                 <h5>Contribute</h5>
-                <ul class="list-inline social-icons"><!-- TODO add link and icon to github -->
-                    <li class="list-inline-item">Github</li>
+                <ul class="list-inline social-icons">
+                    <li class="list-inline-item"><a href="https://github.com/TGLuis/elorienteering"><img src="{% static 'github-mark.png' %}" height="40px" alt="Github"/></a></li>
                 </ul>
             </div>
             <div class="col mb-2 text-center">
@@ -13,8 +14,8 @@
             </div>
             <div class="col mb-2 text-end">
                 <h5>Powered by</h5>
-                <ul class="list-inline social-icons"><!-- TODO add link and icon to helga -->
-                    <li class="list-inline-item">Helga</li>
+                <ul class="list-inline social-icons">
+                    <li class="list-inline-item"><a href="https://helga-o.com/index.php/"><img src="{% static 'Helga.png' %}" height="40px" alt="Helga"/></a></li>
                 </ul>
             </div>
         </div>

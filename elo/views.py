@@ -18,6 +18,10 @@ def detail(request, runner_id):
     context = {"runner": runner, "results": results}
     return HttpResponse(template.render(context, request))
 
+def about(request):
+    template = loader.get_template("elo/about.html")
+    return HttpResponse(template.render({}, request))
+
 def page404():
     return HttpResponse("404 Not found !")
 

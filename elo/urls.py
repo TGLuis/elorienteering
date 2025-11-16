@@ -4,7 +4,7 @@ from elo import views
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("about", views.about, name="about"),
     path("<int:runner_id>/", views.detail, name="runner"),
     path("api/runner/<int:runner_id>/", views.runner_data, name="runner_data"),
-
 ]
