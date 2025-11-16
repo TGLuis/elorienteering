@@ -4,15 +4,18 @@ This project aims to do a classification based of elo calculations of the helga 
 
 ## Features yet to be implemented
 
+### Requirements before V1
+
+- [ ] paginations to have only 100 runners per page with an arrow to fetch the next/previous. (for load time perf)
+- [ ] about page to explain the project and reference github and helga.
+
 ### Short term
 
 - [x] x axis of graphs should be linear in time and not in number of results.
-- [ ] paginations to have only 100 runners per page with an arrow to fetch the next/previous. (for load time perf)
 - [ ] exclude by default all runners with less than 3 results (to remove the one time team names).
 - [ ] handle better the relays (only compare with the same startnumber) for elo calculation.
 - [ ] display the difference of elo gained over the course.
 - [ ] search a runner with the search button.
-- [ ] about page to explain the project and reference github and helga.
 - [ ] Only compute new courses instead of everything from the start.
 - [ ] Launch a cronjob with django to load courses and recompute elo everyday at 3AM.
 
