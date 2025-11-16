@@ -1,7 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template import loader
-import json
 
 from .models import Runner, Result
 
@@ -26,6 +25,6 @@ def runner_data(request, runner_id):
     results = Result.objects.filter(runner__pk=runner_id).order_by("date")
     #data = [{"date": result.ranking.course.date, "event": result.ranking.course.name, "rank": result.ranking.name, "status": result.status, "place": result.place, "elo": result.new_elo} for result in results]
     return JsonResponse({
-        'labels': [result.ranking.course.date.strftime("%Y-%m-%d") for result in results],
+        'labels': [result.ranking.course.date.timestamp() * 1000 for result in results],
         'elo': [float(result.new_elo) for result in results]
     })

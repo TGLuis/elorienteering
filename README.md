@@ -6,21 +6,21 @@ This project aims to do a classification based of elo calculations of the helga 
 
 ### Short term
 
-- paginations to have only 100 runners per page with an arrow to fetch the next/previous. (for load time perf)
-- exclude by default all runners with less than 3 results (to remove the one time team names).
-- handle better the relays (only compare with the same startnumber) for elo calculation.
-- display the difference of elo gained over the course.
-- search a runner with the search button.
-- about page to explain the project and reference github and helga.
-- x axis of graphs should be linear in time and not in number of results.
-- Only compute new courses instead of everything from the start.
-- Launch a cronjob with django to load courses and recompute elo everyday at 3AM.
+- [x] x axis of graphs should be linear in time and not in number of results.
+- [ ] paginations to have only 100 runners per page with an arrow to fetch the next/previous. (for load time perf)
+- [ ] exclude by default all runners with less than 3 results (to remove the one time team names).
+- [ ] handle better the relays (only compare with the same startnumber) for elo calculation.
+- [ ] display the difference of elo gained over the course.
+- [ ] search a runner with the search button.
+- [ ] about page to explain the project and reference github and helga.
+- [ ] Only compute new courses instead of everything from the start.
+- [ ] Launch a cronjob with django to load courses and recompute elo everyday at 3AM.
 
 ### Long term
 
-- Graph with dynamic add/remove of runners to compare evolution.
-- prediction of a course based on elo.
-- merging D & H of a same circuit to have a better comparaison between women and men elo.
+- [ ] Graph with dynamic add/remove of runners to compare evolution.
+- [ ] prediction of a course based on elo.
+- [ ] merging D & H of a same circuit to have a better comparaison between women and men elo.
 
 ## How to contribute
 
