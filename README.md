@@ -6,8 +6,9 @@ This project aims to do a classification based of elo calculations of the helga 
 
 ### Requirements before V1
 
-- [ ] paginations to have only 100 runners per page with an arrow to fetch the next/previous. (for load time perf)
-- [ ] about page to explain the project and reference github and helga.
+- [x] paginations to have only 100 runners per page with an arrow to fetch the next/previous. (for load time perf)
+- [x] about page to explain the project and reference github and helga.
+- [ ] simple stat of page load to get an idea of the number of calls to this website.
 
 ### Short term
 
@@ -28,7 +29,7 @@ This project aims to do a classification based of elo calculations of the helga 
 
 ## How to contribute
 
-Python 3.10 minimum ! I use python 3.14. Please do a PR if you want to add someting or open an issue if you just have some suggestion.
+Python 3.10 minimum (to use the same Django version) ! I use python 3.14. Please do a PR if you want to add something or open an issue if you just have some suggestion.
 
 ## some notes
 
