@@ -18,6 +18,7 @@ This project aims to do a classification based of elo calculations of the helga 
 - [ ] search a runner with the search button.
 - [ ] Only compute new courses instead of everything from the start.
 - [ ] Launch a cronjob with django to load courses and recompute elo everyday at 3AM.
+- [ ] Using cache at least for index/about page
 
 ### Long term
 

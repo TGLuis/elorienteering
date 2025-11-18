@@ -1,10 +1,12 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template import loader
+from django.core.cache import cache
 
 from .models import Runner, Result
 
 def index(request):
+    cache.get(request.path, 0)
     runners = Runner.objects.filter(active=True).order_by("-elo")
     template = loader.get_template("elo/index.html")
     the_runners = [{"elo": runner.elo, "place": x+1, "name": runner.fullname, "id": runner.pk} for x,runner in enumerate(runners)]
@@ -12,6 +14,7 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 def detail(request, runner_id):
+    cache.get(request.path, 0)
     runner = get_object_or_404(Runner, pk=runner_id)
     template = loader.get_template("elo/runner.html")
     results = Result.objects.filter(runner=runner).order_by("-ranking__course__date")

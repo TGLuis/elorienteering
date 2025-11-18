@@ -1,8 +1,13 @@
-import datetime
-
 from django.db import models
 
-# Create your models here.
+class PageView(models.Model):
+    path = models.CharField(max_length=255, unique=True)
+    count = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.path} - {self.count} views"
+
+
 class Runner(models.Model):
     fullname = models.CharField()
     helga_id = models.IntegerField(null=True, db_index=True)
@@ -11,6 +16,7 @@ class Runner(models.Model):
 
     def __str__(self):
         return f"Name={self.fullname}\telo={self.elo}\thelga_id={self.helga_id}"
+
 
 class Course(models.Model):
     name = models.CharField()
@@ -22,6 +28,7 @@ class Course(models.Model):
     def __str__(self):
         return f"{self.name} - {self.date} - {self.location}"
 
+
 class Ranking(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     name = models.CharField()
@@ -30,6 +37,7 @@ class Ranking(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.distance}m - {self.climb}m"
+
 
 class Result(models.Model):
     date = models.DateTimeField(db_index=True)

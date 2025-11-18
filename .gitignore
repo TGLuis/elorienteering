@@ -1,5 +1,4 @@
 .venv/
-dataimport/
 *.sqlite3
 __pycache__
 .idea
