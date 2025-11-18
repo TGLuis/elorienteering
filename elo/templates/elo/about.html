@@ -8,13 +8,33 @@
   </head>
   <body>
   {% include "header_classic.html" %}
-  <h1 class="text-center">About ELOrienteering</h1>
+  <h1 class="m-4 text-center">About ELOrienteering</h1>
   <h2 class="m-4">Objective</h2>
-  <p class="m-2 text-justify">This website aims to do a ranking of the orienteering runners from the <a href="https://helga-o.com/webres/">Helga Webres</a> results. This ranking is <b>NOT</b> used to for any country selection. This is just a ranking to motivate runners to give their best and to see themselves progress.</p>
+  <p class="m-2 text-start">This website aims to do a ranking of the orienteering runners from the <a href="https://helga-o.com/webres/">Helga Webres</a> results. This ranking is <b>NOT</b> used to for any country selection. This is just a ranking to motivate runners to give their best and to see themselves progress.</p>
   <h2 class="m-4">What</h2>
-  <p class="m-2 text-justify">This is an opensource project ! This means that if you want to contribute, <a href="https://github.com/TGLuis/elorienteering/issues">signal an issue or suggest an idea</a>, or just see how this website was made check it on <a href="https://github.com/TGLuis/elorienteering">Github</a>.</p>
+  <p class="m-2 text-start">This is an opensource project ! This means that if you want to contribute, <a href="https://github.com/TGLuis/elorienteering/issues">signal an issue or suggest an idea</a>, or just see how this website was made check it on <a href="https://github.com/TGLuis/elorienteering">Github</a>.</p>
   <h2 class="m-4">Disclaimer</h2>
-  <p class="m-2 text-justify">This website is still under construction the layout and <b>the data</b> might evolve during the coming weeks. This means that if you are seeing an elo for your name right now, in some days or weeks it might change because some tweaking are still ongoing.</p>
+  <p class="m-2 text-start">This website is still under construction the layout and <b>the data</b> might evolve during the coming weeks. This means that if you are seeing an elo for your name right now, in some days or weeks it might change because some tweaking are still ongoing.</p>
+  <h2 class="m-4">How does it work ?</h2>
+  <ul>
+      <li class="m-2 text-start">The first 3 results in Helga, your elo is evaluated in function of the people you arrived close by in the same course.</li>
+      <li class="m-2 text-start">Your first ten results, you will not influence the elo of the runners with more than 10 results.</li>
+      <li class="m-2 text-start">From your race 3 to 30, the gain/loss will be increased by a certain factor to allow a faster progression and stabilisation.</li>
+      <li class="m-2 text-start">If you are above 2000 elo points, the change in elo is divided by 2.</li>
+      <li class="m-2 text-start">If there is less than 5 participants in the ranking, the change of elo is divided by 2.</li>
+      <li class="m-2 text-start">If there is more than 20 participants in the ranking, the change of elo factored logarithmically (40 participants = 2x, 80 participants = 4x,...).</li>
+      <li class="m-2 text-start">Every runner has a confrontation with every other participants (in the same ranking/course) and you will lose or gain points in function of their respective elo.</li>
+      <li class="m-2 text-start">NCL result in a loss of 5 elo points.</li>
+  </ul>
+  <h2 class="m-4">Limitations</h2>
+  <p class="m-2 text-start">Before uploading this website, I have already played a bit with the data coming from this kind of ranking. I have observed the following limitations.</p>
+  <ul>
+      <li class="m-2 text-start">For the moment, results of Women and Men are often separated in Helga, this means that women and men elo evolves mostly separately. This means that you will often not be able to compare efficiently the elo of a men and a women.</li>
+      <li class="m-2 text-start">Elo tend to decrease when you arrive in a more difficult category, this is mostly seen for young people who do their first courses in the Elite category. This does not mean that their level decreases, but just that the level of their course has increased.</li>
+      <li class="m-2 text-start">There is the opposite effect for older categories. When you go to next category, you will confront older people, so normally, you will have an advantage.</li>
+      <li class="m-2 text-start">The elo ranking is a global trend of a runner, if you have one incredible (or poor) performance, this will have an impact on your elo, but not that much. This means that if you do not run for some months because of an injury, (or the opposite, because you train in a foreign country), you will need multiple results on Helga to align your elo with your true level.</li>
+      <li class="m-2 text-start">To state simply, ELO has inertia with its advantages and disadvantages.</li>
+  </ul>
 
 
   {% include "footer.html" %}

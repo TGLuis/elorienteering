@@ -7,7 +7,6 @@ from django.core.paginator import Paginator
 from .models import Runner, Result
 
 def index(request):
-    cache.get(request.path, 0)
     runners = Runner.objects.filter(active=True).order_by("-elo")
     pages = Paginator(runners, 100)
     page_number = int(request.GET.get("page", "1"))
@@ -18,7 +17,6 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 def detail(request, runner_id):
-    cache.get(request.path, 0)
     runner = get_object_or_404(Runner, pk=runner_id)
     template = loader.get_template("elo/runner.html")
     results = Result.objects.filter(runner=runner).order_by("-ranking__course__date")
@@ -26,7 +24,6 @@ def detail(request, runner_id):
     return HttpResponse(template.render(context, request))
 
 def about(request):
-    cache.get(request.path, 0)
     template = loader.get_template("elo/about.html")
     return HttpResponse(template.render({}, request))
 
