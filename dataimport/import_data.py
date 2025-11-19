@@ -1,16 +1,13 @@
 import re
 import os
 import json
-from time import sleep
 import requests
 from datetime import datetime, time
-import sqlite3
 import urllib.parse
 from django.db import transaction, connection
 from dateutil import tz
 
-from django.db.models import F, QuerySet
-from reportclient.internal.report_result import report_result_set_url
+from django.db.models import QuerySet
 from typing import Sequence
 
 
