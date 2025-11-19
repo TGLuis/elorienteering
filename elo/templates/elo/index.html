@@ -19,8 +19,8 @@
         {% for runner in runners %}
         <tr>
             <td>{{ runner.place }}</td>
-            <td><a href="/elo/{{ runner.id }}/">{{ runner.name }}</a></td>
-            <td>{{ runner.elo }}</td>
+            <td><a href="/elo/{{ runner.properties.pk }}/">{{ runner.properties.fullname }}</a></td>
+            <td>{{ runner.properties.elo }}</td>
         </tr>
         {% endfor %}
       </tbody>

@@ -14,6 +14,7 @@ This project aims to do a classification based of elo calculations of the helga 
 
 - [x] x axis of graphs should be linear in time and not in number of results.
 - [ ] exclude by default all runners with less than 3 results (to remove the one time team names).
+- [ ] Use first 3 courses to have a start-elo.
 - [ ] handle better the relays (only compare with the same startnumber) for elo calculation.
 - [ ] display the difference of elo gained over the course.
 - [ ] search a runner with the search button.

@@ -11,7 +11,7 @@ def index(request):
     page_number = int(request.GET.get("page", "1"))
     current_page = pages.page(page_number)
     template = loader.get_template("elo/index.html")
-    the_runners = [{"elo": runner.elo, "place": x, "name": runner.fullname, "id": runner.pk} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
+    the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
     context = {"runners" : the_runners, "page": current_page}
     return HttpResponse(template.render(context, request))
 
