@@ -11,11 +11,12 @@ class PageView(models.Model):
 class Runner(models.Model):
     fullname = models.CharField()
     helga_id = models.IntegerField(null=True, db_index=True)
-    elo = models.DecimalField(default=1500.0, max_digits=7, decimal_places=2)
+    elo = models.DecimalField(default=1500.0, max_digits=7, decimal_places=2, db_index=True)
+    number_of_valid_courses = models.PositiveIntegerField(default=0, db_index=True)
     active = models.BooleanField(default=True, db_index=True)
 
     def __str__(self):
-        return f"Name={self.fullname}\telo={self.elo}\thelga_id={self.helga_id}"
+        return f"Name={self.fullname}\telo={self.elo}\thelga_id={self.helga_id}\tvalid-results={self.number_of_valid_courses}"
 
 
 class Course(models.Model):
@@ -46,7 +47,8 @@ class Result(models.Model):
     place = models.IntegerField()
     time = models.TimeField(null=True)
     status = models.CharField()
+    elo_diff = models.DecimalField(default=0.00, max_digits=7, decimal_places=2)
     new_elo = models.DecimalField(default=1500.0, max_digits=7, decimal_places=2)
 
     def __str__(self):
-        return f"{self.place} - {self.time} - {self.status} - {self.new_elo}"
+        return f"{self.place} - {self.time} - {self.status} - {self.elo_diff} - {self.new_elo}"

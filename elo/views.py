@@ -1,23 +1,24 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
-from django.core.cache import cache
 from django.template import loader
 from django.core.paginator import Paginator
 
+from .utils import Navigation
 from .models import Runner, Result
 
 def index(request):
-    runners = Runner.objects.filter(active=True).order_by("-elo")
+    runners = Runner.objects.filter(active=True, number_of_valid_courses__gte=3).order_by("-elo")
     pages = Paginator(runners, 100)
     page_number = int(request.GET.get("page", "1"))
+    nav = Navigation(pages, page_number)
     current_page = pages.page(page_number)
     template = loader.get_template("elo/index.html")
     the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
-    context = {"runners" : the_runners, "page": current_page}
+    context = {"runners" : the_runners, "nav": nav}
     return HttpResponse(template.render(context, request))
 
 def detail(request, runner_id):
-    runner = get_object_or_404(Runner, pk=runner_id)
+    runner = get_object_or_404(Runner, helga_id=runner_id)
     template = loader.get_template("elo/runner.html")
     results = Result.objects.filter(runner=runner).order_by("-ranking__course__date")
     context = {"runner": runner, "results": results}

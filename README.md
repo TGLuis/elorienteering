@@ -8,19 +8,19 @@ This project aims to do a classification based of elo calculations of the helga 
 
 - [x] paginations to have only 100 runners per page with an arrow to fetch the next/previous. (for load time perf)
 - [x] about page to explain the project and reference github and helga.
-- [ ] simple stat of page load to get an idea of the number of calls to this website.
+- [x] simple stat of page load to get an idea of the number of calls to this website.
 
 ### Short term
 
 - [x] x axis of graphs should be linear in time and not in number of results.
-- [ ] exclude by default all runners with less than 3 results (to remove the one time team names).
-- [ ] Use first 3 courses to have a start-elo.
+- [x] exclude by default all runners with less than 3 results (to remove the one time team names).
+- [x] Use first 3 courses to have a start-elo.
 - [ ] handle better the relays (only compare with the same startnumber) for elo calculation.
-- [ ] display the difference of elo gained over the course.
+- [x] display the difference of elo gained over the course.
 - [ ] search a runner with the search button.
 - [ ] Only compute new courses instead of everything from the start.
 - [ ] Launch a cronjob with django to load courses and recompute elo everyday at 3AM.
-- [ ] Using cache at least for index/about page
+- [x] Using cache at least for index/about page
 
 ### Long term
 
@@ -42,7 +42,7 @@ from dataimport.import_data import *
 elo_for_courses()
 
 
-Runner.objects.all().update(elo=1500.00)
+Runner.objects.all().update(elo=1500.00, number_of_valid_courses=0)
 
 python manage.py makemigrations elo
 python manage.py migrate
