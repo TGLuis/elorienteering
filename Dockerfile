@@ -20,6 +20,10 @@ COPY config ./config
 
 EXPOSE 8008
 
-RUN python manage.py createsuperuser
+RUN python manage.py createsuperuser \
+    && mkdir /var/log/gunicorn \
+    && mkdir /var/run/gunicorn \
+    && mkdir /app/static \
+    && python manage.py collectstatic --noinput
 
 CMD ["gunicorn", "-c", "/app/config/gunicorn/dev.py"]

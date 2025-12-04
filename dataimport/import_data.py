@@ -74,7 +74,7 @@ def add_courses_json_to_db():
     print("finished")
 
 
-default_elo = 1500
+default_elo = 1600
 def get_K(cur_result, n, number_of_previous_results):
     if number_of_previous_results < 5:
         k_base = 200

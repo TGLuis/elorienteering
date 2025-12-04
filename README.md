@@ -42,7 +42,7 @@ from dataimport.import_data import *
 elo_for_courses()
 
 
-Runner.objects.all().update(elo=1500.00, number_of_valid_courses=0)
+Runner.objects.all().update(elo=1600.00, number_of_valid_courses=0)
 
 python manage.py makemigrations elo
 python manage.py migrate
@@ -52,3 +52,6 @@ In cronjob doing this:
 ./manage.py shell < import_data.py ?
 
 https://pypi.org/project/django-crontab/
+
+docker build . -t elorienteering
+docker run --rm -p 8008:8008 -it elorienteering
