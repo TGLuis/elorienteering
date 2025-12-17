@@ -231,6 +231,13 @@ def handle_result_not_OK(results: QuerySet[Result, Result]):
             result.runner.active = True
             result.save()
             result.runner.save()
+        elif result.status == "DSQ":
+            result.new_elo = round(float(result.runner.elo) - 10.00, 2)
+            result.elo_diff = -10.00
+            result.runner.elo = result.new_elo
+            result.runner.active = True
+            result.save()
+            result.runner.save()
         elif result.place == 0:
             result.new_elo = result.runner.elo
             result.elo_diff = 0
