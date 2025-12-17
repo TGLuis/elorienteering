@@ -104,8 +104,6 @@ def get_K(cur_result, n, number_of_previous_results):
         k_base = 50
     if cur_result.runner.elo > 2000:
         k_base /= 2
-    elif cur_result.runner.elo < 600:
-        k_base /= 2
     if n < 5:
         k_base /= 2
     elif n > 20:
@@ -201,6 +199,9 @@ def compute_elo_diff(course, ranking):
             EA = 1 / (1.0 + 10.0 ** ((float(other_result.runner.elo) - float(cur_result.runner.elo)) / 400.0))
             # calculate ELO change vs this one opponent, add it to our change bucket
             elo_change += K * (S - EA)
+
+        if cur_result.runner.elo < 600 and elo_change < 0:
+            elo_change /= 2
         cur_result.elo_diff = round(elo_change, 2)
         cur_result.new_elo = round(float(cur_result.runner.elo) + elo_change, 2)
         cur_result.save()

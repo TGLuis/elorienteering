@@ -55,7 +55,7 @@
         {% for result in results %}
         <tr>
             <td>{{ result.date|date:'d/m/Y' }}</td>
-            <td><a href="https://helga-o.com/webres/index.php?lang=fr&lauf={{ result.ranking.course.helga_id }}">{{ result.ranking.course.name }}</a></td>
+            <td><a href="https://helga-o.com/webres/index.php?lang=fr&lauf={{ result.ranking.course.helga_id }}#{{ result.ranking.name }}">{{ result.ranking.course.name }}</a></td>
             <td>{{ result.status }}</td>
           {% if result.elo_diff == 0 %}
             <td class="text-warning">{{ result.elo_diff }}</td>

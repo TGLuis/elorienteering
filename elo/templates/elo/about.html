@@ -10,35 +10,42 @@
   {% include "header_search.html" %}
   <h1 class="m-4 text-center">About ELOrienteering</h1>
   <h2 class="m-4">Objective</h2>
-  <p class="m-2 text-start">This website aims to do a ranking of the orienteering runners from the <a href="https://helga-o.com/webres/">Helga Webres</a> results. This ranking is <b>NOT</b> used to for any country selection. This is just a ranking to motivate runners to give their best and to see themselves progress.</p>
+  <p class="m-2 text-start">This website ranks orienteering runners based on <a href="https://helga-o.com/webres/">Helga Webres</a> results. The ranking is <b>NOT</b> used for country selection. It's designed to motivate runners to perform their best and track their progress.</p>
   <h2 class="m-4">What</h2>
-  <p class="m-2 text-start">This is an opensource project ! This means that if you want to contribute, <a href="https://github.com/TGLuis/elorienteering/issues">signal an issue or suggest an idea</a>, or just see how this website was made check it on <a href="https://github.com/TGLuis/elorienteering">Github</a>.</p>
+  <p class="m-2 text-start">This is an open-source project. If you want to <a href="https://github.com/TGLuis/elorienteering/issues">contribute, report issues, suggest ideas</a>, or see how the website was built, check it out on <a href="https://github.com/TGLuis/elorienteering">Github</a>.</p>
   <h2 class="m-4">Disclaimer</h2>
-  <p class="m-2 text-start">This website is still under construction the layout and <b>the data</b> might evolve during the coming weeks. This means that if you are seeing an elo for your name right now, in some days or weeks it might change because some tweaking are still ongoing.</p>
+  <p class="m-2 text-start">This website is under construction. The layout and data may evolve in the coming weeks, meaning your current Elo rating may change as ongoing adjustments are made.</p>
   <h2 class="m-4">How does it work ?</h2>
+  <h6 class="m-3">Initial Results (Races 1-3)</h6>
+  <p class="m-2 text-start">Your Elo is evaluated based on runners you finish near in the same course.</p>
+  <h6 class="m-3">First 10 Results</h6>
+  <p class="m-2 text-start">You will not influence the Elo of runners with more than 10 results.</p>
+  <h6 class="m-3">Races 3-30</h6>
+  <p class="m-2 text-start">Gain/loss is increased by a factor to allow faster progression and stabilization.</p>
+  <h6 class="m-3">Elo Adjustments</h6>
   <ul>
-      <li class="m-2 text-start">The first 3 results in Helga, your elo is evaluated in function of the people you arrived close by in the same course.</li>
-      <li class="m-2 text-start">Your first ten results, you will not influence the elo of the runners with more than 10 results.</li>
-      <li class="m-2 text-start">From your race 3 to 30, the gain/loss will be increased by a certain factor to allow a faster progression and stabilisation.</li>
-      <li class="m-2 text-start">If you are above 2000 elo points, the change in elo is divided by 2.</li>
-      <li class="m-2 text-start">If there is less than 5 participants in the ranking, the change of elo is divided by 2.</li>
-      <li class="m-2 text-start">If there is more than 20 participants in the ranking, the change of elo factored logarithmically (40 participants = 2x, 80 participants = 4x,...).</li>
-      <li class="m-2 text-start">Every runner has a confrontation with every other participants (in the same ranking/course) and you will lose or gain points in function of their respective elo.</li>
-      <li class="m-2 text-start">NCL result in a loss of 5 elo points.</li>
-      <li class="m-2 text-start">If you don't do any helga race for a full year, you will lose 1% of your elo. This change does not appear in the history of elo because it is not linked to a course/date.</li>
-      <li class="m-2 text-start">If you don't do any helga race for a full year, your account will be "inactive" and you will not appear in the default classification.</li>
+      <li class="m-2 text-start">Above 2000 Elo points: changes are divided by 2</li>
+      <li class="m-2 text-start">Less than 5 participants in ranking: changes are divided by 2</li>
+      <li class="m-2 text-start">More than 20 participants: changes are factored logarithmically (40 participants = x2, 80 participants = x3, etc.)</li>
+  </ul>
+  <h6 class="m-3">Rating Calculation</h6>
+  <p class="m-2 text-start">Every runner confronts every other participant in the same ranking/course, gaining or losing points based on their respective Elo.</p>
+  <h6 class="m-3">Special Cases</h6>
+  <ul>
+      <li class="m-2 text-start">NCL: results in a loss of 5 Elo points</li>
+      <li class="m-2 text-start">No races for a full year: lose 1% of your Elo (not shown in history as it's not linked to a specific course/date) and your account becomes "inactive," disappearing from the home page ranking.</li>
   </ul>
   <h2 class="m-4">Limitations</h2>
-  <p class="m-2 text-start">Before uploading this website, I have already played a bit with the data coming from this kind of ranking. I have observed the following limitations.</p>
-  <ul>
-      <li class="m-2 text-start">For the moment, results of Women and Men are often separated in Helga, this means that women and men elo evolves mostly separately. This means that you will often not be able to compare efficiently the elo of a men and a women.</li>
-      <li class="m-2 text-start">There is no distinction between a sprint, a long distance or a middle distance, urban or in the forest, so the elo is representative of your level only for the courses you have results. If you only participate in the sprints events, your elo will never be representative of your level in a forest competition.</li>
-      <li class="m-2 text-start">Elo tend to decrease when you arrive in a more difficult category, this is mostly seen for young people who do their first courses in the Elite category. This does not mean that their level decreases, but just that the level of their course has increased.</li>
-      <li class="m-2 text-start">There is the opposite effect for older categories. When you go to next category, you will confront older people, so normally, you will have an advantage.</li>
-      <li class="m-2 text-start">The elo ranking is a global trend of a runner, if you have one incredible (or poor) performance, this will have an impact on your elo, but not that much. This means that if you do not run for some months because of an injury, (or the opposite, because you train in a foreign country), you will need multiple results on Helga to align your elo with your true level.</li>
-      <li class="m-2 text-start">To state simply, ELO has inertia with its advantages and disadvantages.</li>
-      <li class="m-2 text-start">Participating in big events, with a lot of foreigners makes the results less reliable and thus might result in a bigger loss of elo than could be expected, I'm trying to figure out a way to continue take these races into account without impacting too much the local runners elo.</li>
-  </ul>
+  <h6 class="m-3">Gender Separation</h6>
+  <p class="m-2 text-start">Women's and men's results are often separated in Helga, so their Elo evolves mostly independently. Comparing Elo between genders is not reliable.</p>
+  <h6 class="m-3">Course Type Difference</h6>
+  <p class="m-2 text-start">There's no distinction between sprint, long distance, middle distance, urban, or forest courses. Your Elo is only representative of the course types you participate in. For example, if you only participate in sprint events, your Elo won't be representative of your forest competition level.</p>
+  <h6 class="m-3">Category Changes</h6>
+  <p class="m-2 text-start">When moving to a more difficult category, Elo tends to decrease. This is commonly seen with young runners entering the Elite category—it reflects increased course difficulty, not decreased performance. Conversely, when moving to an older category, Elo may increase as you compete against older runners, potentially giving you an advantage.</p>
+  <h6 class="m-3">Elo Inertia</h6>
+  <p class="m-2 text-start">Elo represents a global trend. Single exceptional (or poor) performances have limited impact. After periods without racing (due to injury, training abroad, etc.), multiple Helga results are needed to realign your Elo with your current level. This stability has both advantages and disadvantages.</p>
+  <h6 class="m-3">International Events</h6>
+  <p class="m-2 text-start">Large events with many foreign participants make results less reliable and may result in larger Elo losses than expected. Work is ongoing to find ways to include these races without excessively impacting local runners' Elo.</p>
 
 
   {% include "footer.html" %}
