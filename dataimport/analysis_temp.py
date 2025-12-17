@@ -12,5 +12,5 @@ def display_course_elo_change(helga_id):
         results = Result.objects.filter(ranking=ranking).order_by("place")
         for result in results:
             print(result, end="\t")
-            print(result.runner, end="\t")
+            print(result.runner)
         print("-"*12)

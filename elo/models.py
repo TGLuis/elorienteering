@@ -9,7 +9,7 @@ class PageView(models.Model):
 
 
 class Runner(models.Model):
-    fullname = models.CharField()
+    fullname = models.CharField(db_index=True)
     helga_id = models.IntegerField(null=True, db_index=True)
     elo = models.DecimalField(default=1500.0, max_digits=7, decimal_places=2, db_index=True)
     number_of_valid_courses = models.PositiveIntegerField(default=0, db_index=True)
@@ -49,6 +49,7 @@ class Result(models.Model):
     status = models.CharField()
     elo_diff = models.DecimalField(default=0.00, max_digits=7, decimal_places=2)
     new_elo = models.DecimalField(default=1500.0, max_digits=7, decimal_places=2)
+    startnumber = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.place} - {self.time} - {self.status} - {self.elo_diff} - {self.new_elo}"

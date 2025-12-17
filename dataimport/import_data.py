@@ -28,6 +28,23 @@ def get_runner_from_db(runner_name):
         exit()
 
 
+def modify_course_startnumber():
+    all_ids = get_courses_ids()
+    for course_id in all_ids:
+        with open(f"dataimport/data/courses/{course_id}.json") as f:
+            print(course_id, end=", ", flush=True)
+            course = Course.objects.filter(helga_id=course_id).first()
+            course_json = json.load(f)
+            for ranking_json in course_json["categories"].values():
+                for result_json in ranking_json["results"]:
+                    if "VACANT" in result_json["name"] and (result_json["ageclass"] in [None, "-", ""] or (
+                            result_json["status"] != "OK" and result_json["time"] is None)):
+                        continue
+                    if result_json.get("startnumber") is not None:
+                        result = Result.objects.filter(ranking__course=course,ranking__name=ranking_json["name"],runner__fullname=result_json["name"]).first()
+                        result.startnumber = result_json.get("startnumber", 0)
+                        result.save()
+    print("finished")
 
 def add_courses_json_to_db():
     get_new_courses()
@@ -68,6 +85,7 @@ def add_courses_json_to_db():
                         result.time = None
                     result.status = result_json["status"]
                     result.date = course.date
+                    result.startnumber = result_json.get("startnumber", 0)
                     results.append(result)
 
             Result.objects.bulk_create(results)
@@ -85,6 +103,8 @@ def get_K(cur_result, n, number_of_previous_results):
     else:
         k_base = 50
     if cur_result.runner.elo > 2000:
+        k_base /= 2
+    elif cur_result.runner.elo < 600:
         k_base /= 2
     if n < 5:
         k_base /= 2
@@ -161,9 +181,8 @@ def compute_elo_diff(course, ranking):
             continue
 
         other_results = [result for result in valid_results if result != cur_result]
-        # TODO startnumber is not in db !!
-        #if concurrent.get("startnumber") is not None and len([1 for x in opponents if x["startnumber"] == concurrent["startnumber"]]) > 1:
-        #    opponents = [x for x in concurrents if x["startnumber"] == concurrent["startnumber"]]
+        if cur_result.startnumber != 0 and len([1 for x in other_results if x.startnumber == cur_result.startnumber]):
+            other_results = [x for x in other_results if x.startnumber == cur_result.startnumber]
         n = len(other_results)
         if n < 1:
             cur_result.new_elo = cur_result.runner.elo
@@ -246,4 +265,6 @@ def elo_for_courses():
         for ranking in rankings:
             compute_elo_diff(course, ranking)
     print()
+
+
 

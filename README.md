@@ -15,9 +15,9 @@ This project aims to do a classification based of elo calculations of the helga 
 - [x] x axis of graphs should be linear in time and not in number of results.
 - [x] exclude by default all runners with less than 3 results (to remove the one time team names).
 - [x] Use first 3 courses to have a start-elo.
-- [ ] handle better the relays (only compare with the same startnumber) for elo calculation.
+- [x] handle better the relays (only compare with the same startnumber) for elo calculation.
 - [x] display the difference of elo gained over the course.
-- [ ] search a runner with the search button.
+- [x] search a runner with the search button.
 - [ ] Only compute new courses instead of everything from the start.
 - [ ] Launch a cronjob with django to load courses and recompute elo everyday at 3AM.
 - [x] Using cache at least for index/about page
@@ -41,6 +41,8 @@ add_courses_json_to_db()
 from dataimport.import_data import *
 elo_for_courses()
 
+from dataimport.analysis_temp import *
+display_course_elo_change(6157)
 
 Runner.objects.all().update(elo=1600.00, number_of_valid_courses=0)
 
