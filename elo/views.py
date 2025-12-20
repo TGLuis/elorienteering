@@ -28,12 +28,8 @@ def about(request):
     template = loader.get_template("elo/about.html")
     return HttpResponse(template.render({}, request))
 
-def page404():
-    return HttpResponse("404 Not found !")
-
 def runner_data(request, runner_id):
     results = Result.objects.filter(runner__pk=runner_id).order_by("date")
-    #data = [{"date": result.ranking.course.date, "event": result.ranking.course.name, "rank": result.ranking.name, "status": result.status, "place": result.place, "elo": result.new_elo} for result in results]
     return JsonResponse({
         'labels': [result.ranking.course.date.timestamp() * 1000 for result in results],
         'elo': [float(result.new_elo) for result in results]

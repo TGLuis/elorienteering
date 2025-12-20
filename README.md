@@ -21,11 +21,21 @@ This project aims to do a classification based of elo calculations of the helga 
 - [ ] Only compute new courses instead of everything from the start.
 - [ ] Launch a cronjob with django to load courses and recompute elo everyday at 3AM.
 - [x] Using cache at least for index/about page
+- [ ] add link to "challenge de régularité national" https://hoekx.be/natcrit/
 
 ### Long term
 
 - [ ] Graph with dynamic add/remove of runners to compare evolution.
-- [ ] prediction of a course based on elo.
+- [ ] prediction of a course based on helga-start.
+- [ ] ranking only of abso/bvos licensed runners. 
+- [ ] dashboard for a runner with stats
+  - number of results
+  - highest elo in last 2 years
+  - highest gain in last 2 years
+  - Number of NCL in last 2 years
+  - increase in last 2 years
+  - percentile ?
+- [ ] Get a graph with distribution of elo (for runner with more than 3 results) and different percentiles
 - [ ] merging D & H of a same circuit to have a better comparaison between women and men elo.
 
 ## How to contribute
