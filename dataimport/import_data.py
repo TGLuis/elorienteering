@@ -275,6 +275,6 @@ def elo_for_courses():
     print()
 
 def import_all():
-    Runner.objects.all().update(elo=1600.00, number_of_valid_courses=0)
     add_courses_json_to_db()
+    Runner.objects.all().update(elo=1600.00, number_of_valid_courses=0)
     elo_for_courses()
