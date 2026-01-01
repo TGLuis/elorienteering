@@ -19,9 +19,10 @@ This project aims to do a classification based of elo calculations of the helga 
 - [x] display the difference of elo gained over the course.
 - [x] search a runner with the search button.
 - [ ] Only compute new courses instead of everything from the start.
-- [ ] Launch a cronjob with django to load courses and recompute elo everyday at 3AM.
+- [x] Launch a cronjob with django to load courses and recompute elo everyday at 2AM.
 - [x] Using cache at least for index/about page
-- [ ] add link to "challenge de régularité national" https://hoekx.be/natcrit/
+- [x] add link to "challenge de régularité national" https://hoekx.be/natcrit/
+- [x] add a favicon
 
 ### Long term
 
@@ -37,6 +38,7 @@ This project aims to do a classification based of elo calculations of the helga 
   - percentile ?
 - [ ] Get a graph with distribution of elo (for runner with more than 3 results) and different percentiles
 - [ ] merging D & H of a same circuit to have a better comparaison between women and men elo.
+- [ ] Translation in french + dutch
 
 ## How to contribute
 

@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ["127.0.0.1", "192.168.1.100", "elorienteering.com"]
 
 INSTALLED_APPS = [
     'elo.apps.EloConfig',
+    'django_crontab',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,6 +53,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CRONJOBS = [
+    ('0 2 * * *', 'dataimport.import_data.import_all')
 ]
 
 ROOT_URLCONF = 'elorienteering.urls'

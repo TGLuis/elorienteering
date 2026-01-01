@@ -274,5 +274,7 @@ def elo_for_courses():
             compute_elo_diff(course, ranking)
     print()
 
-
-
+def import_all():
+    Runner.objects.all().update(elo=1600.00, number_of_valid_courses=0)
+    add_courses_json_to_db()
+    elo_for_courses()
