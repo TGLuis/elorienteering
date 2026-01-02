@@ -1,0 +1,171 @@
+<!doctype html>
+{% load static %}
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ELOrienteering</title>
+    <link rel="icon" type="image/png" href="{% static 'favicon.png' %}" >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-scale-timestack/dist/chartjs-scale-timestack.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>
+
+  {% include "header_search.html" %}
+    <div>
+        <h1 class="m-4 text-center">Compare runners</h1>
+      <div class="container" align="center">
+        <input type="text" id="searchRunner" placeholder="Type runner name..." autocomplete="off" class="m-2 input" />
+        <div id="searchRunnerList" class="m-1"></div>
+        <div class="col-xl-10 text-center m-2">
+          <canvas id="myChart"></canvas>
+          <button type="button" class="m-2 btn btn-primary" onclick="theChart.resetZoom()">Reset zoom</button>
+        </div>
+      </div>
+
+      <table class="m-2 table table-striped">
+        <thead>
+        <th scope="col">Name</th>
+        <th scope="col">ELO</th>
+        <th scope="col">Delete</th>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+      </table>
+    </div>
+
+    <script type="text/javascript">
+        Chart.register(Chart.Colors);
+        Chart.register(ChartZoom);
+        theChart = new Chart(document.getElementById('myChart'), {
+            type: 'line',
+            options: {
+                scales: {
+                    x: {
+                        type: 'timestack'
+                    }
+                },
+                plugins: {
+                    colors: {
+                        forceOverride: true
+                    },
+                    zoom: {
+                        zoom: {
+                            wheel: {
+                                enabled: true,
+                            },
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'xy',
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+ <script>
+    const searchRunner = document.getElementById('searchRunner');
+    const searchRunnerList = document.getElementById('searchRunnerList');
+    const tableBody = document.getElementById('tableBody');
+
+    function clearSearchRunnerList() {
+        searchRunnerList.innerHTML = '';
+    }
+
+    function createSearchRunnerItem(runner) {
+        const div = document.createElement('div');
+        div.textContent = runner.name;
+        div.onclick = function() {addRunnerToList(runner);};
+        return div;
+    }
+
+    function addRunnerToList(runner) {
+        fetch('/elo/api/runner/'+runner.id)
+            .then(response => response.json())
+            .then(data => {
+              const tr = document.createElement('tr');
+              current_elo = data.dataset.at(-1)[1];
+              const tdName = document.createElement('td');
+              tdName.textContent = runner.name;
+              const tdElo = document.createElement('td');
+              tdElo.textContent = current_elo;
+              const tdDel = document.createElement('td');
+              tdDel.textContent = "🗑️";
+              tdDel.onclick = function() {removeData(runner.name, tr);};
+              tr.appendChild(tdName);
+              tr.appendChild(tdElo);
+              tr.appendChild(tdDel);
+              tableBody.appendChild(tr);
+
+              addData(data.dataset, runner.name);
+        });
+    }
+
+    function addData(dataset, runner_name) {
+        theChart.data.datasets.push({
+            label: runner_name,
+            data: dataset
+        });
+        theChart.update();
+    }
+
+    function removeData(runner_name, row) {
+        row.remove();
+        theChart.data.datasets = theChart.data.datasets.filter(dataset => dataset.label !== runner_name);
+        theChart.update();
+    }
+
+    async function fetchSearchRunner() {
+        const query = searchRunner.value.trim();
+
+        if (query.length === 0) {
+            clearSearchRunnerList();
+            return;
+        }
+
+        const url = new URL('/elo/api/runner/compare', window.location.origin);
+        url.searchParams.append('runner_pattern', query);
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const runners = await response.json();
+
+            clearSearchRunnerList();
+            console.log(runners);
+
+            if (runners.length === 0) {
+                const noResult = document.createElement('div');
+                noResult.textContent = 'No runner found';
+                searchRunnerList.appendChild(noResult);
+                return;
+            }
+
+            runners.forEach(runner => {
+                searchRunnerList.appendChild(createSearchRunnerItem(runner));
+            });
+        } catch (error) {
+            console.error('Fetch error:', error);
+        }
+    }
+
+    searchRunner.addEventListener('input', fetchSearchRunner);
+
+    // Close autocomplete list if clicked outside
+    document.addEventListener('click', (e) => {
+        if (e.target !== searchRunner) {
+            clearSearchRunnerList();
+        }
+    });
+</script>
+
+  {% include "footer.html" %}
+  </body>
+</html>

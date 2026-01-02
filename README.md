@@ -26,7 +26,7 @@ This project aims to do a classification based of elo calculations of the helga 
 
 ### Long term
 
-- [ ] Graph with dynamic add/remove of runners to compare evolution.
+- [x] Graph with dynamic add/remove of runners to compare evolution.
 - [ ] prediction of a course based on helga-start.
 - [ ] ranking only of abso/bvos licensed runners. 
 - [ ] dashboard for a runner with stats
@@ -37,7 +37,7 @@ This project aims to do a classification based of elo calculations of the helga 
   - increase in last 2 years
   - percentile ?
 - [ ] Get a graph with distribution of elo (for runner with more than 3 results) and different percentiles
-- [ ] merging D & H of a same circuit to have a better comparaison between women and men elo.
+- [ ] merging D & H of a same circuit to have a better comparison between women and men elo.
 - [ ] Translation in french + dutch
 
 ## How to contribute

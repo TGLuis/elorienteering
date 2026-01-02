@@ -17,6 +17,10 @@ def index(request):
     context = {"runners" : the_runners, "nav": nav}
     return HttpResponse(template.render(context, request))
 
+def compare(request):
+    template = loader.get_template("elo/compare.html")
+    return HttpResponse(template.render({}, request))
+
 def detail(request, runner_id):
     runner = get_object_or_404(Runner, helga_id=runner_id)
     template = loader.get_template("elo/runner.html")
@@ -31,10 +35,14 @@ def about(request):
 def runner_data(request, runner_id):
     results = Result.objects.filter(runner__pk=runner_id).order_by("date")
     return JsonResponse({
-        'labels': [result.ranking.course.date.timestamp() * 1000 for result in results],
-        'elo': [float(result.new_elo) for result in results]
+        'dataset': [[result.ranking.course.date.timestamp() * 1000, float(result.new_elo)] for result in results],
     })
 
 def runner_search(request):
     runners = Runner.objects.filter(fullname__icontains=request.GET['runner_pattern'])[:10]
     return JsonResponse([{"name":runner.fullname,"url":f"/elo/{runner.helga_id}"} for runner in runners], safe=False)
+
+def runner_compare(request):
+    runners = Runner.objects.filter(fullname__icontains=request.GET['runner_pattern'])[:10]
+    return JsonResponse([{"name":runner.fullname,"id":runner.pk} for runner in runners], safe=False)
+
