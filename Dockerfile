@@ -2,6 +2,9 @@ FROM python:3.14-slim
 
 WORKDIR /app
 
+RUN apt-get update
+RUN apt-get install -y cron
+
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 

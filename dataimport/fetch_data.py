@@ -1,3 +1,4 @@
+import os
 import urllib.parse
 from datetime import datetime
 
@@ -6,6 +7,8 @@ import os
 from time import sleep
 import re
 from enum import Enum
+
+DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
 
 class OV(Enum):
     AntwerpOrienteers = "Antwerp Orienteers"
@@ -32,7 +35,7 @@ class FRSO(Enum):
 
 def from_db_to_json_id():
     return # Should not be used anymore only for first import
-    with sqlite3.connect("dataimport/data/helga.sqlite3") as conn:
+    with sqlite3.connect(f"{DIR_PATH}/data/helga.sqlite3") as conn:
         cur = conn.cursor()
         res = cur.execute("SELECT id, name, elo FROM Runner").fetchall()
         for row in res:
@@ -69,20 +72,20 @@ def get_new_courses():
         response = requests.get(url, headers=headers)
         course_ids = sorted(re.findall(r"lauf=(\d+)", response.text))
         for course_id in course_ids:
-            if not os.path.exists(f"dataimport/data/courses/{course_id}.json"):
-                with open(f"dataimport/data/courses/{course_id}.json", "w") as f:
+            if not os.path.exists(f"{DIR_PATH}/data/courses/{course_id}.json"):
+                with open(f"{DIR_PATH}/data/courses/{course_id}.json", "w") as f:
                     response = requests.get(f"https://helga-o.com/webres/ws.php?lauf={course_id}")
                     f.write(response.text)
                 sleep(2)
 
 
 def get_courses_ids():
-    for (dirpath, dirnames, filenames) in os.walk("dataimport/data/courses"):
+    for (dirpath, dirnames, filenames) in os.walk(f"{DIR_PATH}/data/courses"):
         all_filenames = filenames
     all_courses = []
     for filename in all_filenames:
         try:
-            with open(f"dataimport/data/courses/{filename}") as f:
+            with open(f"{DIR_PATH}/data/courses/{filename}") as f:
                 f.readline()
                 date = datetime.fromisoformat(f.readline().split('"')[3])
                 all_courses.append({"id": filename.split(".")[0], "date": date})
@@ -103,3 +106,4 @@ def get_helga_id(runner_name):
     else:
         print(f"Requesting helga_id for runner: {runner_name}")
         return int(re.findall(r"runner=(\d+).*?>" + re.escape(runner_name), response.text)[0])
+

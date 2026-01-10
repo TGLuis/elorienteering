@@ -1,3 +1,4 @@
+import os 
 import json
 from datetime import datetime, time
 from django.db import transaction, connection
@@ -9,6 +10,8 @@ from typing import Sequence
 
 from dataimport.fetch_data import get_new_courses, get_courses_ids, get_helga_id
 from elo.models import Runner, Course, Ranking, Result
+
+DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
 
 
 def get_runner_from_db(runner_name):
@@ -31,7 +34,7 @@ def get_runner_from_db(runner_name):
 def modify_course_startnumber():
     all_ids = get_courses_ids()
     for course_id in all_ids:
-        with open(f"dataimport/data/courses/{course_id}.json") as f:
+        with open(f"{DIR_PATH}/data/courses/{course_id}.json") as f:
             print(course_id, end=", ", flush=True)
             course = Course.objects.filter(helga_id=course_id).first()
             course_json = json.load(f)
@@ -50,7 +53,7 @@ def add_courses_json_to_db():
     get_new_courses()
     all_ids = get_courses_ids()
     for course_id in all_ids:
-        with open(f"dataimport/data/courses/{course_id}.json") as f:
+        with open(f"{DIR_PATH}/data/courses/{course_id}.json") as f:
             print(course_id, end=", ", flush=True)
             if Course.objects.filter(helga_id=course_id).first() is not None:
                 continue
