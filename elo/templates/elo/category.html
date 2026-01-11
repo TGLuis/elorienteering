@@ -10,7 +10,7 @@
   </head>
   <body>
   {% include "header_search.html" %}
-  <h1 class="m-4 text-center">ELO Ranking</h1>
+  <h1 class="m-4 text-center">Category</h1>
       <div class="container" align="center">
         <div class="col-xl-10 m-2">
           {% include "nav.html" %}
@@ -18,18 +18,32 @@
               <thead>
               <th scope="col">#</th>
               <th scope="col">Name</th>
-              <th scope="col">ELO</th>
+              <th scope="col">status</th>
+              <th scope="col">ELO update</th>
+              <th scope="col">New ELO</th>
               </thead>
               <tbody>
-                {% for runner in runners %}
+                {% for result in results %}
                 <tr>
-                    <td>{{ runner.place }}</td>
-                    <td><a href="/elo/{{ runner.properties.helga_id }}/">{{ runner.properties.fullname }}</a></td>
-                    <td>{{ runner.properties.elo }}</td>
+                    <td>{{ result.place }}</td>
+                    <td><a href="/elo/{{ result.runner.helga_id }}/">{{ result.runner.fullname }}</a></td>
+                    <td>{{ result.status }}</td>
+                      {% if result.elo_diff == 0 %}
+                        <td class="text-warning">{{ result.elo_diff }}</td>
+                      {% endif %}
+                      {% if result.elo_diff > 0 %}
+                        <td class="text-success">+{{ result.elo_diff }}</td>
+                      {% endif %}
+                      {% if result.elo_diff < 0 %}
+                        <td class="text-danger">{{ result.elo_diff }}</td>
+                      {% endif %}
+                    <td>{{ result.new_elo }}</td>
                 </tr>
                 {% endfor %}
               </tbody>
           </table>
+
+  <h3 class="m-4 text-center"><a href="https://helga-o.com/webres/index.php?lang=fr&lauf={{ ranking.course.helga_id }}#{{ ranking.name }}">See on Helga</a></h3>
           {% include "nav.html" %}
         </div>
       </div>

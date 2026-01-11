@@ -1,4 +1,4 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.template import loader
 from django.core.paginator import Paginator
@@ -20,6 +20,14 @@ def index(request):
 def compare(request):
     template = loader.get_template("elo/compare.html")
     return HttpResponse(template.render({}, request))
+
+def category(request, ranking_id):
+    results = Result.objects.filter(ranking__pk=ranking_id)
+    if not results:
+        raise Http404("Ranking does not exist")
+    template = loader.get_template("elo/category.html")
+    return HttpResponse(template.render({"results": results, "ranking": results.first().ranking}, request))
+
 
 def detail(request, runner_id):
     runner = get_object_or_404(Runner, helga_id=runner_id)
