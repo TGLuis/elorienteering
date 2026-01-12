@@ -96,7 +96,8 @@ def add_courses_json_to_db():
 
 
 default_elo = 1600
-def get_K(cur_result, n, number_of_previous_results):
+def get_k_base(cur_result, n, number_of_previous_results):
+    # ! k_base should be divided by the number of updates !
     if number_of_previous_results < 5:
         k_base = 200
     elif number_of_previous_results < 10:
@@ -111,7 +112,7 @@ def get_K(cur_result, n, number_of_previous_results):
         k_base /= 2
     elif n > 20:
         k_base *= (n / 20) ** 0.5
-    return k_base / n
+    return k_base
 
 
 def get_mean_elo_others(valid_results: Sequence[Result], the_result: Result, before: bool):
@@ -190,19 +191,26 @@ def compute_elo_diff(course, ranking):
             cur_result.elo_diff = 0
             continue
 
-        K = get_K(cur_result, n, number_of_previous_results)
+        k_base = get_k_base(cur_result, n, number_of_previous_results)
 
         elo_change = 0
+        real_n = 0  # number of people really participating in the update of the elo.
         for other_result in other_results:
             if number_of_previous_results > 10 > other_result.runner.number_of_valid_courses:
                 # skip if you have more than 10 results but your opponent has less
                 continue
+            if abs(other_result.place-cur_result.place) > 10:
+                # If you are more than 10 places away from somebody you don't influence it's elo update
+                continue
+            real_n += 1
             S = get_S(cur_result, other_result)
             # work out EA
             EA = 1 / (1.0 + 10.0 ** ((float(other_result.runner.elo) - float(cur_result.runner.elo)) / 400.0))
             # calculate ELO change vs this one opponent, add it to our change bucket
-            elo_change += K * (S - EA)
+            elo_change += S - EA
 
+        if real_n > 0:
+            elo_change *= k_base / real_n
         if cur_result.runner.elo < 600 and elo_change < 0:
             elo_change /= 2
         cur_result.elo_diff = round(elo_change, 2)
@@ -281,3 +289,7 @@ def import_all():
     add_courses_json_to_db()
     Runner.objects.all().update(elo=1600.00, number_of_valid_courses=0)
     elo_for_courses()
+
+
+if __name__ == "__main__":
+    import_all()

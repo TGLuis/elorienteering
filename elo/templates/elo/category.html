@@ -10,7 +10,8 @@
   </head>
   <body>
   {% include "header_search.html" %}
-  <h1 class="m-4 text-center">Category</h1>
+  <h1 class="m-4 text-center">{{ ranking.course.name }} - {{ ranking.name }}</h1>
+  <h4 class="m-4 text-center">{{ ranking.course.date|date:"d/m/Y" }}</h4>
       <div class="container" align="center">
         <div class="col-xl-10 m-2">
           {% include "nav.html" %}
