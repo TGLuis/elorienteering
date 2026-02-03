@@ -155,9 +155,34 @@ def evaluate_first_elo(valid_results: Sequence[Result], the_result: Result):
         elo_mean.append(min(max(elo_after, 1000), 2000))
     return rounded_mean(elo_mean)
 
+def get_real_opponents(number_of_previous_results, valid_results, cur_result):
+    other_results = {result.place:result for result in valid_results if result != cur_result}
+    if cur_result.startnumber != 0 and len([1 for x in other_results.values() if x.startnumber == cur_result.startnumber]):
+        other_results = {x.place:x for x in other_results.values() if x.startnumber == cur_result.startnumber}
+
+    real_opponents = []
+    places = sorted(other_results.keys())
+    found_before = found_after = 0
+    for i in [place for place in places if place < cur_result.place][::-1]:
+        # skip if you have more than 10 results but your opponent has less
+        if number_of_previous_results < 11 or 11 < other_results[i].runner.number_of_valid_courses:
+            found_before += 1
+            real_opponents.append(other_results[i])
+            if found_before == 10:
+                break
+    for i in [place for place in places if place > cur_result.place]:
+        # skip if you have more than 10 results but your opponent has less
+        if number_of_previous_results < 11 or 11 < other_results[i].runner.number_of_valid_courses:
+            found_after += 1
+            real_opponents.append(other_results[i])
+            if found_after == 10:
+                break
+
+    return real_opponents
+
 
 @transaction.atomic
-def compute_elo_diff(course, ranking):
+def compute_elo_diff(ranking):
     results = Result.objects.filter(ranking=ranking)
     handle_result_not_OK(results)
 
@@ -182,9 +207,7 @@ def compute_elo_diff(course, ranking):
             cur_result.save()
             continue
 
-        other_results = [result for result in valid_results if result != cur_result]
-        if cur_result.startnumber != 0 and len([1 for x in other_results if x.startnumber == cur_result.startnumber]):
-            other_results = [x for x in other_results if x.startnumber == cur_result.startnumber]
+        other_results = get_real_opponents(number_of_previous_results, valid_results, cur_result)
         n = len(other_results)
         if n < 1:
             cur_result.new_elo = cur_result.runner.elo
@@ -196,12 +219,6 @@ def compute_elo_diff(course, ranking):
         elo_change = 0
         real_n = 0  # number of people really participating in the update of the elo.
         for other_result in other_results:
-            if number_of_previous_results > 10 > other_result.runner.number_of_valid_courses:
-                # skip if you have more than 10 results but your opponent has less
-                continue
-            if abs(other_result.place-cur_result.place) > 10:
-                # If you are more than 10 places away from somebody you don't influence it's elo update
-                continue
             real_n += 1
             S = get_S(cur_result, other_result)
             # work out EA
@@ -282,7 +299,7 @@ def elo_for_courses():
         print(f"{course.helga_id}", end=", ", flush=True)
         rankings = Ranking.objects.filter(course=course)
         for ranking in rankings:
-            compute_elo_diff(course, ranking)
+            compute_elo_diff(ranking)
     print()
 
 def import_all():

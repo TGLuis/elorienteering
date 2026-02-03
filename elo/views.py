@@ -42,9 +42,7 @@ def about(request):
 
 def runner_data(request, runner_id):
     results = Result.objects.filter(runner__pk=runner_id).order_by("date")
-    return JsonResponse({
-        'dataset': [[result.ranking.course.date.timestamp() * 1000, float(result.new_elo)] for result in results],
-    })
+    return JsonResponse({'dataset': [[result.date.timestamp() * 1000, float(result.new_elo)] for result in results]})
 
 def runner_search(request):
     runners = Runner.objects.filter(fullname__icontains=request.GET['runner_pattern'])[:10]

@@ -1,49 +1,18 @@
 import os
-import urllib.parse
-from datetime import datetime
+import json
+import re
+
+from time import sleep
 
 import requests
-import os
-from time import sleep
-import re
-from enum import Enum
+import urllib.parse
+
+from datetime import datetime, time
+
+from elo.models import Course
 
 DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
 
-class OV(Enum):
-    AntwerpOrienteers = "Antwerp Orienteers"
-    Borasca = "Borasca"
-    Hamok = "hamok"
-    KOL = "K.O.L."
-    Omega = "Omega"
-    Trol = "TROL"
-class FRSO(Enum):
-    Altair = "Altaïr Orientation"
-    Ardoc = "O.L.G. St. Vith ARDOC"
-    ASUB = "ASUB"
-    Balise10 = "Balise 10"
-    CoLiege = "CO Liège"
-    COMB = "C.O. Militaire Belge"
-    Hermatenae = "Hermathenae"
-    HOC = "Hainaut O.C."
-    LOST = "LOST"
-    OLV = "OLV Eifel"
-    Pegase = "Pégase CO"
-    SudOLux = "SUD O LUX"
-    Thor = "ThOR"
-
-
-def from_db_to_json_id():
-    return # Should not be used anymore only for first import
-    with sqlite3.connect(f"{DIR_PATH}/data/helga.sqlite3") as conn:
-        cur = conn.cursor()
-        res = cur.execute("SELECT id, name, elo FROM Runner").fetchall()
-        for row in res:
-            runner = Runner()
-            runner.helga_id = row[0]
-            runner.fullname = row[1]
-            runner.elo = 1500.00
-            runner.save()
 
 def get_new_courses():
     urls = [
@@ -72,10 +41,12 @@ def get_new_courses():
         response = requests.get(url, headers=headers)
         course_ids = sorted(re.findall(r"lauf=(\d+)", response.text))
         for course_id in course_ids:
-            if not os.path.exists(f"{DIR_PATH}/data/courses/{course_id}.json"):
-                with open(f"{DIR_PATH}/data/courses/{course_id}.json", "w") as f:
+            filename = f"{DIR_PATH}/data/courses/{course_id}.json"
+            if not os.path.exists(filename):
+                with open(filename, "w") as f:
                     response = requests.get(f"https://helga-o.com/webres/ws.php?lauf={course_id}")
                     f.write(response.text)
+                pre_process(course_id, filename)
                 sleep(2)
 
 
@@ -106,4 +77,59 @@ def get_helga_id(runner_name):
     else:
         print(f"Requesting helga_id for runner: {runner_name}")
         return int(re.findall(r"runner=(\d+).*?>" + re.escape(runner_name), response.text)[0])
+
+
+def merge_DH(categories):
+    category_names = { re.findall(r"[HD]:(.*)", x)[0] for x in categories.keys() }
+    new_categories = {}
+    for category_name in category_names:
+        new_categories[category_name] = merge_categories(category_name, categories.get("D:"+category_name), categories.get("H:"+category_name))
+    return new_categories
+
+def merge_categories(name, category1, category2):
+    if category1 is None:
+        category2["name"] = name
+        return category2
+    if category2 is None:
+        category1["name"] = name
+        return category1
+    results = category1.get("results", []) + category2.get("results", [])
+    non_zero = [result for result in results if result["position"] != 0]
+    non_zero.sort(key=lambda x: (time.fromisoformat(x["time"])))
+    position, egalite = 0, 1
+    old_time = time.fromisoformat("00:00:00.000")
+    for res in non_zero:
+        if time.fromisoformat(res["time"]) > old_time:
+            position += egalite
+            egalite = 1
+        elif time.fromisoformat(res["time"]) == old_time:
+            egalite += 1
+        res["position"] = position
+        old_time = time.fromisoformat(res["time"])
+    results = non_zero + sorted([result for result in results if result["position"] == 0], key=lambda x: x["status"], reverse=True)
+    return {
+        "name": name,
+        "distance": category1["distance"],
+        "climb": category1["climb"],
+        "results" : results
+    }
+
+
+def pre_process(helga_id, course_file):
+    with open(course_file) as f:
+        course_json = json.load(f)
+    categories = course_json["categories"]
+    if all([re.findall(r"[HD]:.*", category_name) for category_name in categories.keys()]):
+        print(f"Merging for course: {helga_id} - {course_json['name']}")
+        course_json["categories"] = merge_DH(categories)
+        course_db = Course.objects.get(helga_id=helga_id)
+        course_db.delete()
+        with open(course_file, "w+") as f:
+            json.dump(course_json, f, indent=4)
+
+def iterate_over_all_course_files():
+    for (dirpath, dirnames, filenames) in os.walk(f"{DIR_PATH}/data/courses"):
+        all_filenames = filenames
+    for filename in all_filenames:
+        pre_process(filename.split(".")[0], f"{DIR_PATH}/data/courses/{filename}")
 

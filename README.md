@@ -37,7 +37,7 @@ This project aims to do a classification based of elo calculations of the helga 
   - increase in last 2 years
   - percentile ?
 - [ ] Get a graph with distribution of elo (for runner with more than 3 results) and different percentiles
-- [ ] merging D & H of a same circuit to have a better comparison between women and men elo.
+- [x] merging D & H of a same circuit to have a better comparison between women and men elo.
 - [ ] Translation in french + dutch
 
 ## How to contribute
