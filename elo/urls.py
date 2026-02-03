@@ -5,7 +5,9 @@ from elo import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("compare", views.compare, name="compare"),
-    path("category/<int:ranking_id>/", views.category, name="category"),
+    path("ranking/<int:ranking_id>/", views.ranking, name="ranking"),
+    path("categories", views.categories, name="categories"),
+    path("category/<str:category_name>/", views.category, name="category"),
     path("about", views.about, name="about"),
     path("<int:runner_id>/", views.detail, name="runner"),
     path("api/runner/<int:runner_id>/", views.runner_data, name="runner_data"),

@@ -28,7 +28,7 @@ This project aims to do a classification based of elo calculations of the helga 
 
 - [x] Graph with dynamic add/remove of runners to compare evolution.
 - [ ] prediction of a course based on helga-start.
-- [ ] ranking only of abso/bvos licensed runners. 
+- [x] ranking only of abso/bvos licensed runners. 
 - [ ] dashboard for a runner with stats
   - number of results
   - highest elo in last 2 years

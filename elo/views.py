@@ -2,6 +2,7 @@ from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.template import loader
 from django.core.paginator import Paginator
+from itertools import zip_longest
 
 from .utils import Navigation
 from .models import Runner, Result
@@ -21,11 +22,11 @@ def compare(request):
     template = loader.get_template("elo/compare.html")
     return HttpResponse(template.render({}, request))
 
-def category(request, ranking_id):
+def ranking(request, ranking_id):
     results = Result.objects.filter(ranking__pk=ranking_id)
     if not results:
         raise Http404("Ranking does not exist")
-    template = loader.get_template("elo/category.html")
+    template = loader.get_template("elo/ranking.html")
     return HttpResponse(template.render({"results": results, "ranking": results.first().ranking}, request))
 
 
@@ -35,6 +36,30 @@ def detail(request, runner_id):
     results = Result.objects.filter(runner=runner).order_by("-ranking__course__date")
     context = {"runner": runner, "results": results}
     return HttpResponse(template.render(context, request))
+
+def categories(request):
+    template = loader.get_template("elo/categories.html")
+    categories = list(Runner.objects.all().values_list("category", flat=True).distinct())
+    dames = [category for category in categories if category and category[0] == "D"]
+    hommes = [category for category in categories if category and category[0] == "H"]
+    categories = [{"man": homme, "woman": dame} for homme,dame in zip_longest(hommes, dames, fillvalue="")]
+    return HttpResponse(template.render({"categories": categories}, request))
+
+def category(request, category_name):
+    categories = list(Runner.objects.all().values_list("category", flat=True).distinct())
+    if category_name not in categories:
+        raise Http404("Ranking does not exist")
+    template = loader.get_template("elo/category.html")
+    runners = Runner.objects.filter(category=category_name, number_of_valid_courses__gte=3).order_by("-elo")
+    pages = Paginator(runners, 100)
+    page_number = int(request.GET.get("page", "1"))
+    nav = Navigation(pages, page_number)
+    current_page = pages.page(page_number)
+    the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
+    context = {"runners" : the_runners, "nav": nav, "base": f"category/{category_name}/", "category_name": category_name}
+    return HttpResponse(template.render(context, request))
+
+
 
 def about(request):
     template = loader.get_template("elo/about.html")
