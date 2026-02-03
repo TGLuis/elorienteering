@@ -10,27 +10,31 @@
   </head>
   <body>
   {% include "header_search.html" %}
-  <h1 class="m-4 text-center">Belgian Ranking - {{ category_name }}</h1>
+  <h1 class="m-4 text-center">Belgian Categories</h1>
       <div class="container" align="center">
         <div class="col-xl-10 m-2">
           {% include "nav.html" %}
           <table class="m-2 table table-striped table-hover">
               <thead>
-              <th scope="col">#</th>
-              <th scope="col">Name</th>
-              <th scope="col">ELO</th>
+              <th scope="col">Women</th>
+              <th scope="col">Men</th>
               </thead>
               <tbody>
-                {% for runner in runners %}
+                {% for category in categories %}
                 <tr>
-                    <td>{{ runner.place }}</td>
-                    <td><a href="/elo/{{ runner.properties.helga_id }}/">{{ runner.properties.fullname }}</a></td>
-                    <td>{{ runner.properties.elo }}</td>
-                </tr>
+                    {% if category.woman != "" %}
+                    <td><a href="/elo/category/{{ category.woman }}/">{{ category.woman }}</a></td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
+                    {% if category.man != "" %}
+                    <td><a href="/elo/category/{{ category.man }}/">{{ category.man }}</a></td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
                 {% endfor %}
               </tbody>
           </table>
-          {% include "nav.html" %}
         </div>
       </div>
 

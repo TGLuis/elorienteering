@@ -77,7 +77,7 @@
             {% for result in results %}
             <tr>
                 <td>{{ result.date|date:'d/m/Y' }}</td>
-                <td><a href="/elo/category/{{ result.ranking.pk }}/">{{ result.ranking.course.name }}</a></td>
+                <td><a href="/elo/ranking/{{ result.ranking.pk }}/">{{ result.ranking.course.name }}</a></td>
                 <td>{{ result.status }}</td>
               {% if result.elo_diff == 0 %}
                 <td class="text-warning">{{ result.elo_diff }}</td>
