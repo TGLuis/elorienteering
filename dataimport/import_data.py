@@ -194,6 +194,7 @@ def compute_elo_diff(ranking):
         if n < 1:
             cur_result.new_elo = cur_result.runner.elo
             cur_result.elo_diff = 0
+            cur_result.save()
             continue
 
         k_base = get_k_base(cur_result, n, number_of_previous_results)
