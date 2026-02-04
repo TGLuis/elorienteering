@@ -5,6 +5,9 @@ class Navigation:
         self.pages = pages
         self.current_page_number = page_number
 
+    def needs_pagination(self):
+        return self.pages.num_pages > 1
+
     def needs_previous(self):
         return self.current_page_number > 1
 

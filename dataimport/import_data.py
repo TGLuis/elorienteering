@@ -31,24 +31,6 @@ def get_runner_from_db(runner_name):
         exit()
 
 
-def modify_course_startnumber():
-    all_ids = get_courses_ids()
-    for course_id in all_ids:
-        with open(f"{DIR_PATH}/data/courses/{course_id}.json") as f:
-            print(course_id, end=", ", flush=True)
-            course = Course.objects.filter(helga_id=course_id).first()
-            course_json = json.load(f)
-            for ranking_json in course_json["categories"].values():
-                for result_json in ranking_json["results"]:
-                    if "VACANT" in result_json["name"] and (result_json["ageclass"] in [None, "-", ""] or (
-                            result_json["status"] != "OK" and result_json["time"] is None)):
-                        continue
-                    if result_json.get("startnumber") is not None:
-                        result = Result.objects.filter(ranking__course=course,ranking__name=ranking_json["name"],runner__fullname=result_json["name"]).first()
-                        result.startnumber = result_json.get("startnumber", 0)
-                        result.save()
-    print("finished")
-
 def add_courses_json_to_db():
     get_new_courses()
     all_ids = get_courses_ids()

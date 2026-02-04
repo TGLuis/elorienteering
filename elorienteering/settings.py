@@ -56,7 +56,8 @@ MIDDLEWARE = [
 ]
 
 CRONJOBS = [
-    ('0 2 * * *', 'dataimport.import_data.import_all')
+    ('0 2 * * *', 'dataimport.import_data.import_all'),
+    ('0 4 * * 1', 'dataimport.opunch.import_be')
 ]
 
 ROOT_URLCONF = 'elorienteering.urls'
