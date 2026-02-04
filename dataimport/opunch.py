@@ -31,6 +31,7 @@ def import_fede_members(fede_content):
 
 def import_be():
     key = os.environ.get("OPUNCH_KEY")
+    # TODO cleanup runners which are not anymore on the list !
     ov_request = requests.get(ov_url.format(key))
     import_fede_members(ov_request.content)
     frso_request = requests.get(frso_url.format(key))

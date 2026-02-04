@@ -8,7 +8,7 @@ from django.db.models import QuerySet
 from typing import Sequence
 
 
-from dataimport.fetch_data import get_new_courses, get_courses_ids, get_helga_id
+from dataimport.fetch_data import get_new_courses, get_courses_ids, get_helga_id, is_vacant_result
 from elo.models import Runner, Course, Ranking, Result
 
 DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
@@ -58,7 +58,7 @@ def add_courses_json_to_db():
                 ranking.save()
 
                 for result_json in ranking_json["results"]:
-                    if "VACANT" in result_json["name"] and (result_json["ageclass"] in [None, "-", ""] or (result_json["status"] != "OK" and result_json["time"] is None)):
+                    if is_vacant_result(result_json):
                         continue
                     result = Result()
                     result.ranking = ranking
@@ -75,6 +75,7 @@ def add_courses_json_to_db():
 
             Result.objects.bulk_create(results)
     print("finished")
+
 
 
 default_elo = 1600
@@ -172,56 +173,73 @@ def compute_elo_diff(ranking):
     if len(valid_results) == 0:
         return
     if len(valid_results) == 1:
-        valid_results[0].new_elo = valid_results[0].runner.elo
-        valid_results[0].elo_diff = 0
-        valid_results[0].runner.active = True
-        valid_results[0].save()
-        valid_results[0].runner.save()
+        only_one_runner(valid_results[0])
         return
 
 
     for cur_result in valid_results:
         number_of_previous_results = cur_result.runner.number_of_valid_courses
         if number_of_previous_results < 3:
-            new_elo = evaluate_first_elo(valid_results, cur_result)
-            cur_result.new_elo = new_elo
-            cur_result.elo_diff = 0
-            cur_result.save()
+            first_three_results(cur_result, valid_results)
             continue
 
         other_results = get_real_opponents(number_of_previous_results, valid_results, cur_result)
         n = len(other_results)
         if n < 1:
-            cur_result.new_elo = cur_result.runner.elo
-            cur_result.elo_diff = 0
-            cur_result.save()
+            only_one_runner(cur_result)
             continue
 
         k_base = get_k_base(cur_result, n, number_of_previous_results)
 
-        elo_change = 0
-        real_n = 0  # number of people really participating in the update of the elo.
-        for other_result in other_results:
-            real_n += 1
-            S = get_S(cur_result, other_result)
-            # work out EA
-            EA = 1 / (1.0 + 10.0 ** ((float(other_result.runner.elo) - float(cur_result.runner.elo)) / 400.0))
-            # calculate ELO change vs this one opponent, add it to our change bucket
-            elo_change += S - EA
+        elo_change = get_elo_change(cur_result, k_base, other_results)
+        save_elo_change(cur_result, elo_change)
+    save_all_runners(valid_results)
 
-        if real_n > 0:
-            elo_change *= k_base / real_n
-        if cur_result.runner.elo < 600 and elo_change < 0:
-            elo_change /= 2
-        cur_result.elo_diff = round(elo_change, 2)
-        cur_result.new_elo = round(float(cur_result.runner.elo) + elo_change, 2)
-        cur_result.save()
 
+def save_elo_change(cur_result, elo_change):
+    if cur_result.runner.elo < 600 and elo_change < 0:
+        elo_change /= 2
+    cur_result.elo_diff = round(elo_change, 2)
+    cur_result.new_elo = round(float(cur_result.runner.elo) + elo_change, 2)
+    cur_result.save()
+
+
+def save_all_runners(valid_results):
     for result in valid_results:
         result.runner.elo = result.new_elo
         result.runner.number_of_valid_courses += 1
         result.runner.active = True
         result.runner.save()
+
+
+def get_elo_change(cur_result, k_base, other_results):
+    elo_change = 0
+    real_n = 0  # number of people really participating in the update of the elo.
+    for other_result in other_results:
+        real_n += 1
+        S = get_S(cur_result, other_result)
+        # work out EA
+        EA = 1 / (1.0 + 10.0 ** ((float(other_result.runner.elo) - float(cur_result.runner.elo)) / 400.0))
+        # calculate ELO change vs this one opponent, add it to our change bucket
+        elo_change += S - EA
+    if real_n > 0:
+        elo_change *= k_base / real_n
+    return elo_change
+
+
+def first_three_results(cur_result, valid_results):
+    new_elo = evaluate_first_elo(valid_results, cur_result)
+    cur_result.new_elo = new_elo
+    cur_result.elo_diff = 0
+    cur_result.save()
+
+
+def only_one_runner(result):
+    result.new_elo = result.runner.elo
+    result.elo_diff = 0
+    result.runner.active = True
+    result.save()
+    result.runner.save()
 
 
 def get_S(cur_result: Result, other_result: Result) -> float:

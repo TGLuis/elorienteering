@@ -1,6 +1,7 @@
 import os
 import json
 import re
+from collections import defaultdict
 
 from time import sleep
 
@@ -79,12 +80,18 @@ def get_helga_id(runner_name):
         return int(re.findall(r"runner=(\d+).*?>" + re.escape(runner_name), response.text)[0])
 
 
+def is_vacant_result(result_json):
+    return "VACANT" in result_json["name"] and (result_json["ageclass"] in [None, "-", ""] or (
+                result_json["status"] != "OK" and result_json["time"] is None))
+
+
 def merge_DH(categories):
     category_names = { re.findall(r"[HD]:(.*)", x)[0] for x in categories.keys() }
     new_categories = {}
     for category_name in category_names:
         new_categories[category_name] = merge_categories(category_name, categories.get("D:"+category_name), categories.get("H:"+category_name))
     return new_categories
+
 
 def merge_categories(name, category1, category2):
     if category1 is None:
@@ -93,8 +100,17 @@ def merge_categories(name, category1, category2):
     if category2 is None:
         category1["name"] = name
         return category1
-    results = category1.get("results", []) + category2.get("results", [])
-    non_zero = [result for result in results if result["position"] != 0]
+    results = reattribute_positions(category1.get("results", []) + category2.get("results", []))
+    return {
+        "name": name,
+        "distance": category1["distance"],
+        "climb": category1["climb"],
+        "results" : results
+    }
+
+
+def reattribute_positions(results):
+    non_zero = [result for result in results if result["position"] != 0 and result["status"] == "OK"]
     non_zero.sort(key=lambda x: (time.fromisoformat(x["time"])))
     position, egalite = 0, 1
     old_time = time.fromisoformat("00:00:00.000")
@@ -106,13 +122,38 @@ def merge_categories(name, category1, category2):
             egalite += 1
         res["position"] = position
         old_time = time.fromisoformat(res["time"])
-    results = non_zero + sorted([result for result in results if result["position"] == 0], key=lambda x: x["status"], reverse=True)
-    return {
-        "name": name,
-        "distance": category1["distance"],
-        "climb": category1["climb"],
-        "results" : results
-    }
+    results = non_zero + sorted([result for result in results if result["position"] == 0], key=lambda x: x["status"],
+                                reverse=True)
+    return results
+
+
+def is_relay(category):
+    startnumbers = defaultdict(lambda: 0)
+    for result in category['results']:
+        if result.get('startnumber') is None:
+            return False
+        startnumbers[result.get('startnumber')] += 1
+    return all([ val > 1 for val in startnumbers.values()])
+
+
+def split_relay(categories):
+    new_categories = defaultdict(dict)
+    for category_name, category in categories.items():
+        for res in category["results"]:
+            if is_vacant_result(res):
+                continue
+            startnumber = res["startnumber"]
+            if new_categories.get(f"{category_name}.{startnumber}") is None:
+                new_categories[f"{category_name}.{startnumber}"] = {
+                    "name": f"{category['name']}.{startnumber}",
+                    "distance": category["distance"],
+                    "climb": category["climb"],
+                    "results": []
+                }
+            new_categories[f"{category_name}.{startnumber}"]["results"].append(res)
+    for name, category in new_categories.items():
+        new_categories[name]["results"] = reattribute_positions(category["results"])
+    return new_categories
 
 
 def pre_process(helga_id, course_file):
@@ -120,10 +161,17 @@ def pre_process(helga_id, course_file):
         course_json = json.load(f)
     categories = course_json["categories"]
     if all([re.findall(r"[HD]:.*", category_name) for category_name in categories.keys()]):
-        print(f"Merging for course: {helga_id} - {course_json['name']}")
+        print(f"Merging HD for course: {helga_id} - {course_json['name']}")
         course_json["categories"] = merge_DH(categories)
-        course_db = Course.objects.get(helga_id=helga_id)
-        course_db.delete()
+        if course_db := Course.objects.filter(helga_id=helga_id):
+            course_db.delete()
+        with open(course_file, "w+") as f:
+            json.dump(course_json, f, indent=4)
+    elif all([is_relay(category) for category in categories.values()]):
+        print(f"Splitting relay for course: {helga_id} - {course_json['name']}")
+        course_json["categories"] = split_relay(categories)
+        if course_db := Course.objects.filter(helga_id=helga_id):
+            course_db.delete()
         with open(course_file, "w+") as f:
             json.dump(course_json, f, indent=4)
 
@@ -132,4 +180,3 @@ def iterate_over_all_course_files():
         all_filenames = filenames
     for filename in all_filenames:
         pre_process(filename.split(".")[0], f"{DIR_PATH}/data/courses/{filename}")
-

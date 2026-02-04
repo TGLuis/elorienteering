@@ -23,6 +23,7 @@ This project aims to do a classification based of elo calculations of the helga 
 - [x] Using cache at least for index/about page
 - [x] add link to "challenge de régularité national" https://hoekx.be/natcrit/
 - [x] add a favicon
+- [x] fix relays
 
 ### Long term
 
