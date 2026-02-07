@@ -89,8 +89,6 @@ def get_k_base(cur_result, n, number_of_previous_results):
         k_base = 75
     else:
         k_base = 50
-    if cur_result.runner.elo > 2000:
-        k_base /= 2
     if n < 5:
         k_base /= 2
     elif n > 20:
@@ -254,15 +252,15 @@ def get_S(cur_result: Result, other_result: Result) -> float:
 def handle_result_not_OK(results: QuerySet[Result, Result]):
     for result in results:
         if result.status == "NCL":
-            result.new_elo = round(float(result.runner.elo) - 5.00, 2)
-            result.elo_diff = -5.00
+            result.elo_diff = -round(float(result.runner.elo)*0.005, 2)
+            result.new_elo = round(float(result.runner.elo) + float(result.elo_diff), 2)
             result.runner.elo = result.new_elo
             result.runner.active = True
             result.save()
             result.runner.save()
         elif result.status == "DSQ":
-            result.new_elo = round(float(result.runner.elo) - 10.00, 2)
-            result.elo_diff = -10.00
+            result.elo_diff = -round(float(result.runner.elo)*0.010, 2)
+            result.new_elo = round(float(result.runner.elo) + float(result.elo_diff), 2)
             result.runner.elo = result.new_elo
             result.runner.active = True
             result.save()
@@ -285,7 +283,7 @@ def set_runner_inactive(last_year):
 
 def update_elo_runners_inactives(last_year):
     with connection.cursor() as cursor:
-        cursor.execute("UPDATE elo_runner SET elo = ROUND(elo * 0.99, 2) WHERE active=0;")
+        cursor.execute("UPDATE elo_runner SET elo = ROUND(elo * 0.985, 2) WHERE active=0;")
 
 
 def elo_for_courses():

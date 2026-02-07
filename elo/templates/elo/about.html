@@ -26,7 +26,6 @@
   <p class="m-2 text-start">Gain/loss is increased by a factor to allow faster progression and stabilization.</p>
   <h6 class="m-3">Elo Adjustments</h6>
   <ul>
-      <li class="m-2 text-start">Above 2000 Elo points: changes are divided by 2</li>
       <li class="m-2 text-start">Less than 5 participants in ranking: changes are divided by 2</li>
       <li class="m-2 text-start">More than 20 participants: changes are factored logarithmically (40 participants = x2, 80 participants = x3, etc.)</li>
   </ul>
@@ -34,13 +33,11 @@
   <p class="m-2 text-start">Every runner confronts the participants close by (maximum 10 places) in the same ranking/course, gaining or losing points based on their respective Elo.</p>
   <h6 class="m-3">Special Cases</h6>
   <ul>
-      <li class="m-2 text-start">NCL: results in a loss of 5 Elo points</li>
-      <li class="m-2 text-start">DSQ: results in a loss of 10 Elo points</li>
-      <li class="m-2 text-start">No races for a full year: lose 1% of your Elo (not shown in history as it's not linked to a specific course/date) and your account becomes "inactive," disappearing from the home page ranking.</li>
+      <li class="m-2 text-start">NCL: results in a loss of 0.5% of your Elo</li>
+      <li class="m-2 text-start">DSQ: results in a loss of 1% of your Elo</li>
+      <li class="m-2 text-start">No races for a full year: lose 1.5% of your Elo (not shown in history as it's not linked to a specific course/date) and your account becomes "inactive," disappearing from the home page ranking.</li>
   </ul>
   <h2 class="m-4">Limitations</h2>
-  <h6 class="m-3">Gender Separation</h6>
-  <p class="m-2 text-start">Women's and men's results are often separated in Helga, so their Elo evolves mostly independently. Comparing Elo between genders is not reliable.</p>
   <h6 class="m-3">Course Type Difference</h6>
   <p class="m-2 text-start">There's no distinction between sprint, long distance, middle distance, urban, or forest courses. Your Elo is only representative of the course types you participate in. For example, if you only participate in sprint events, your Elo won't be representative of your forest competition level.</p>
   <h6 class="m-3">Category Changes</h6>
