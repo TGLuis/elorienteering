@@ -32,6 +32,9 @@ class Course(models.Model):
     location = models.CharField()
     status = models.IntegerField(null=True)
 
+    def get_year(self):
+        return self.date.year
+
     def __str__(self):
         return f"{self.name} - {self.date} - {self.location}"
 

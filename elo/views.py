@@ -3,9 +3,10 @@ from django.shortcuts import get_object_or_404
 from django.template import loader
 from django.core.paginator import Paginator
 from itertools import zip_longest
+from django.db.models import Sum, Count
 
 from .utils import Navigation
-from .models import Runner, Result
+from .models import Runner, Result, Course
 
 def index(request):
     runners = Runner.objects.filter(active=True, number_of_valid_courses__gte=3).order_by("-elo")
@@ -57,6 +58,28 @@ def category(request, category_name):
     current_page = pages.page(page_number)
     the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
     context = {"runners" : the_runners, "nav": nav, "base": f"category/{category_name}/", "category_name": category_name}
+    return HttpResponse(template.render(context, request))
+
+def restless(request):
+    years = list({ course.get_year() for course in Course.objects.all().distinct() })
+    if (active_year := request.GET.get("year", "year")) != "year":
+        if int(active_year) not in years:
+            raise Http404(f"Year {request.GET.get('year')} does not have any result")
+    template = loader.get_template("elo/restless.html")
+    if active_year == "year":
+        runners = (Result.objects.filter(status="OK").values("runner__fullname", "runner__helga_id")
+                   .annotate(count=Count("runner")).filter(count__gte=3).order_by("-count"))
+    else:
+        runners = (Result.objects.filter(status="OK",date__gte=f"{active_year}-01-01 00:00", date__lt=f"{int(active_year)+1}-01-01 00:00")
+                   .values("runner__fullname", "runner__helga_id")
+                   .annotate(count=Count("runner")).filter(count__gte=3).order_by("-count"))
+    pages = Paginator(runners, 100)
+    page_number = int(request.GET.get("page", "1"))
+    nav = Navigation(pages, page_number)
+    current_page = pages.page(page_number)
+    the_runners = [{"name": runner["runner__fullname"], "helga_id": runner["runner__helga_id"], "count": runner["count"], "place": x}
+    for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
+    context = {"runners" : the_runners, "nav": nav, "base": f"restless/", "years": years[::-1], "active_year":active_year, "other_params":f"&year={active_year}"}
     return HttpResponse(template.render(context, request))
 
 

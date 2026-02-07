@@ -2,35 +2,35 @@
 <nav aria-label="Page navigation">
   <ul class="pagination justify-content-center">
       {% if nav.needs_previous2 %}
-    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page=1">«</a></li>
+    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page=1{{ other_params }}">«</a></li>
       {% endif %}
       {% if nav.needs_previous %}
-    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.previous_page_number }}"><</a></li>
+    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.previous_page_number }}{{ other_params }}"><</a></li>
       {% endif %}
       {% if nav.needs_dots_before %}
     <li class="page-item"><a class="page-link">...</a></li>
       {% endif %}
       {% if nav.needs_previous2 %}
-    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.previous2_page_number }}">{{ nav.previous2_page_number }}</a></li>
+    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.previous2_page_number }}{{ other_params }}">{{ nav.previous2_page_number }}</a></li>
       {% endif %}
       {% if nav.needs_previous %}
-    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.previous_page_number }}">{{ nav.previous_page_number }}</a></li>
+    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.previous_page_number }}{{ other_params }}">{{ nav.previous_page_number }}</a></li>
       {% endif %}
     <li class="page-item"><a class="page-link" href="#"><b>{{ nav.current_page_number }}</b></a></li>
       {% if nav.needs_next %}
-    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.next_page_number }}">{{ nav.next_page_number }}</a></li>
+    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.next_page_number }}{{ other_params }}">{{ nav.next_page_number }}</a></li>
       {% endif %}
       {% if nav.needs_next2 %}
-    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.next2_page_number }}">{{ nav.next2_page_number }}</a></li>
+    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.next2_page_number }}{{ other_params }}">{{ nav.next2_page_number }}</a></li>
       {% endif %}
       {% if nav.needs_dots_after %}
     <li class="page-item"><a class="page-link">...</a></li>
       {% endif %}
       {% if nav.needs_next %}
-    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.next_page_number }}">></a></li>
+    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.next_page_number }}{{ other_params }}">></a></li>
       {% endif %}
       {% if nav.needs_next2 %}
-    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.pages.num_pages }}">»</a></li>
+    <li class="page-item"><a class="page-link" href="/elo/{{ base }}?page={{ nav.pages.num_pages }}{{ other_params }}">»</a></li>
       {% endif %}
   </ul>
 </nav>
