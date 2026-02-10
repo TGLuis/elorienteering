@@ -1,3 +1,5 @@
+import datetime
+
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.template import loader
@@ -61,7 +63,7 @@ def category(request, category_name):
     return HttpResponse(template.render(context, request))
 
 def restless(request):
-    years = list({ course.get_year() for course in Course.objects.all().distinct() })
+    years = list(range(2005,datetime.date.today().year+1))
     if (active_year := request.GET.get("year", "year")) != "year":
         if int(active_year) not in years:
             raise Http404(f"Year {request.GET.get('year')} does not have any result")
@@ -81,7 +83,6 @@ def restless(request):
     for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
     context = {"runners" : the_runners, "nav": nav, "base": f"restless/", "years": years[::-1], "active_year":active_year, "other_params":f"&year={active_year}"}
     return HttpResponse(template.render(context, request))
-
 
 
 def about(request):
