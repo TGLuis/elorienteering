@@ -6,6 +6,7 @@ from django.template import loader
 from django.core.paginator import Paginator
 from itertools import zip_longest
 from django.db.models import Sum, Count
+from django.core.cache import cache
 
 from .utils import Navigation
 from .models import Runner, Result, Course
@@ -62,19 +63,30 @@ def category(request, category_name):
     context = {"runners" : the_runners, "nav": nav, "base": f"category/{category_name}/", "category_name": category_name}
     return HttpResponse(template.render(context, request))
 
+def get_restless_from_cache(active_year):
+    if active_year == "year":
+        return cache.get_or_set(
+            "restless_year",
+            (Result.objects.filter(status="OK").values("runner__fullname", "runner__helga_id")
+             .annotate(count=Count("runner")).filter(count__gte=3).order_by("-count")),
+            timeout=7200  # 2 hours
+        )
+    return cache.get_or_set(
+        "restless_year",
+        (Result.objects.filter(status="OK", date__gte=f"{active_year}-01-01 00:00",
+                               date__lt=f"{int(active_year) + 1}-01-01 00:00")
+         .values("runner__fullname", "runner__helga_id")
+         .annotate(count=Count("runner")).filter(count__gte=3).order_by("-count")),
+        timeout=7200  # 2 hours
+    )
+
 def restless(request):
     years = list(range(2005,datetime.date.today().year+1))
     if (active_year := request.GET.get("year", "year")) != "year":
         if int(active_year) not in years:
             raise Http404(f"Year {request.GET.get('year')} does not have any result")
     template = loader.get_template("elo/restless.html")
-    if active_year == "year":
-        runners = (Result.objects.filter(status="OK").values("runner__fullname", "runner__helga_id")
-                   .annotate(count=Count("runner")).filter(count__gte=3).order_by("-count"))
-    else:
-        runners = (Result.objects.filter(status="OK",date__gte=f"{active_year}-01-01 00:00", date__lt=f"{int(active_year)+1}-01-01 00:00")
-                   .values("runner__fullname", "runner__helga_id")
-                   .annotate(count=Count("runner")).filter(count__gte=3).order_by("-count"))
+    runners = get_restless_from_cache(active_year)
     pages = Paginator(runners, 100)
     page_number = int(request.GET.get("page", "1"))
     nav = Navigation(pages, page_number)
