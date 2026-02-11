@@ -5,14 +5,14 @@ from django.shortcuts import get_object_or_404
 from django.template import loader
 from django.core.paginator import Paginator
 from itertools import zip_longest
-from django.db.models import Sum, Count
-from django.core.cache import cache
 
+from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache
 from .utils import Navigation
-from .models import Runner, Result, Course
+from .models import Runner, Result
+
 
 def index(request):
-    runners = Runner.objects.filter(active=True, number_of_valid_courses__gte=3).order_by("-elo")
+    runners = get_main_ranking_from_cache()
     pages = Paginator(runners, 100)
     page_number = int(request.GET.get("page", "1"))
     nav = Navigation(pages, page_number)
@@ -22,9 +22,11 @@ def index(request):
     context = {"runners" : the_runners, "nav": nav}
     return HttpResponse(template.render(context, request))
 
+
 def compare(request):
     template = loader.get_template("elo/compare.html")
     return HttpResponse(template.render({}, request))
+
 
 def ranking(request, ranking_id):
     results = Result.objects.filter(ranking__pk=ranking_id)
@@ -37,20 +39,22 @@ def ranking(request, ranking_id):
 def detail(request, runner_id):
     runner = get_object_or_404(Runner, helga_id=runner_id)
     template = loader.get_template("elo/runner.html")
-    results = Result.objects.filter(runner=runner).order_by("-ranking__course__date")
+    results = Result.objects.filter(runner=runner).order_by("-date")
     context = {"runner": runner, "results": results}
     return HttpResponse(template.render(context, request))
 
-def categories(request):
+
+def get_categories(request):
     template = loader.get_template("elo/categories.html")
-    categories = list(Runner.objects.all().values_list("category", flat=True).distinct())
+    categories = get_all_categories_from_cache()
     dames = [category for category in categories if category and category[0] == "D"]
     hommes = [category for category in categories if category and category[0] == "H"]
     categories = [{"man": homme, "woman": dame} for homme,dame in zip_longest(hommes, dames, fillvalue="")]
     return HttpResponse(template.render({"categories": categories}, request))
 
-def category(request, category_name):
-    categories = list(Runner.objects.all().values_list("category", flat=True).distinct())
+
+def get_category(request, category_name):
+    categories = get_all_categories_from_cache()
     if category_name not in categories:
         raise Http404("Ranking does not exist")
     template = loader.get_template("elo/category.html")
@@ -63,22 +67,6 @@ def category(request, category_name):
     context = {"runners" : the_runners, "nav": nav, "base": f"category/{category_name}/", "category_name": category_name}
     return HttpResponse(template.render(context, request))
 
-def get_restless_from_cache(active_year):
-    if active_year == "year":
-        return cache.get_or_set(
-            "restless_year",
-            (Result.objects.filter(status="OK").values("runner__fullname", "runner__helga_id")
-             .annotate(count=Count("runner")).filter(count__gte=3).order_by("-count")),
-            timeout=7200  # 2 hours
-        )
-    return cache.get_or_set(
-        "restless_year",
-        (Result.objects.filter(status="OK", date__gte=f"{active_year}-01-01 00:00",
-                               date__lt=f"{int(active_year) + 1}-01-01 00:00")
-         .values("runner__fullname", "runner__helga_id")
-         .annotate(count=Count("runner")).filter(count__gte=3).order_by("-count")),
-        timeout=7200  # 2 hours
-    )
 
 def restless(request):
     years = list(range(2005,datetime.date.today().year+1))
@@ -101,13 +89,16 @@ def about(request):
     template = loader.get_template("elo/about.html")
     return HttpResponse(template.render({}, request))
 
+
 def runner_data(request, runner_id):
     results = Result.objects.filter(runner__pk=runner_id).order_by("date")
     return JsonResponse({'dataset': [[result.date.timestamp() * 1000, float(result.new_elo)] for result in results]})
 
+
 def runner_search(request):
     runners = Runner.objects.filter(fullname__icontains=request.GET['runner_pattern'])[:10]
     return JsonResponse([{"name":runner.fullname,"url":f"/elo/{runner.helga_id}"} for runner in runners], safe=False)
+
 
 def runner_compare(request):
     runners = Runner.objects.filter(fullname__icontains=request.GET['runner_pattern'])[:10]

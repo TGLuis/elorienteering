@@ -1,6 +1,8 @@
-from django.db.models import Max, Min
+from django.db.models import Max, Min, Sum, Count
 
 from elo.models import Runner, Course, Ranking, Result
+import numpy as np
+import matplotlib.pyplot as plt
 
 def display_course_elo_change(helga_id):
     course = Course.objects.get(helga_id=helga_id)
@@ -33,3 +35,20 @@ def display_ncl_percentage_per_runner(name):
           len(Result.objects.filter(runner=runner, status="NCL")) /
           len(Result.objects.filter(runner=runner))
     )
+
+def distribution_of_elo_update():
+    runner_with_more_than_30_results = Result.objects.filter(status="OK").values("runner__fullname", "runner__pk").annotate(count=Count("runner")).order_by("-count").filter(count__gte=31)
+    results = []
+    for runner in runner_with_more_than_30_results:
+        results.extend(list(Result.objects.filter(status="OK",runner__pk=runner['runner__pk']).exclude(place=0).exclude(elo_diff=0.00).order_by("date")[31:]))
+    elo_diff_array = np.array([float(res.elo_diff) for res in results])
+    # Calculate basic statistics
+    print(f"Mean: {np.mean(elo_diff_array):.2f}")
+    print(f"Standard Deviation: {np.std(elo_diff_array):.2f}")
+    plt.hist(elo_diff_array, bins=300, density=True)
+    plt.title("elo diff Distribution", fontsize=18)
+    plt.xlabel("Value", fontsize=14)
+    plt.ylabel("Frequency", fontsize=14)
+    plt.show()
+    return elo_diff_array
+
