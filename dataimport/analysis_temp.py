@@ -52,3 +52,16 @@ def distribution_of_elo_update():
     plt.show()
     return elo_diff_array
 
+def distribution_of_elo():
+    runner_with_more_than_3_results = Runner.objects.filter(number_of_valid_courses__gt=3)
+    elo_array = np.array([float(runner.elo) for runner in runner_with_more_than_3_results])
+    # Calculate basic statistics
+    print(f"Mean: {np.mean(elo_array):.2f}")
+    print(f"Standard Deviation: {np.std(elo_array):.2f}")
+    plt.hist(elo_array, bins=100, density=True)
+    plt.title("elo Distribution", fontsize=18)
+    plt.xlabel("Value", fontsize=14)
+    plt.ylabel("Frequency", fontsize=14)
+    plt.show()
+    return elo_array
+

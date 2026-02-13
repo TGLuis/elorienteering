@@ -31,13 +31,21 @@ This project aims to do a classification based of elo calculations of the helga 
 - [ ] prediction of a course based on helga-start.
 - [x] ranking only of abso/bvos licensed runners. 
 - [ ] dashboard for a runner with stats
-  - number of results
-  - highest elo in last 2 years
-  - highest gain in last 2 years
-  - Number of NCL in last 2 years
-  - increase in last 2 years
-  - percentile ?
-- [ ] Get a graph with distribution of elo (for runner with more than 3 results) and different percentiles
+  - General
+    - [x] number of results
+    - [x] total time running
+    - [x] NCL percentage
+    - [ ] best/current OK streak (ignoring DNS)
+  - with more than 30 results
+    - [ ] Best increase ?
+    - [x] highest elo
+    - [ ] percentile ?
+    - [ ] Helga for runner with more than 30 results ?
+  - if BE
+    - [ ] rank in BE
+    - [ ] ?
+  - [ ] Separate elo details to another page for efficiency time?
+- [x] Get a graph with distribution of elo (for runner with more than 3 results)
 - [x] merging D & H of a same circuit to have a better comparison between women and men elo.
 - [ ] Translation in french + dutch
 

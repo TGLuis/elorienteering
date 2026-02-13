@@ -7,6 +7,21 @@
     <title>ELOrienteering</title>
     <link rel="icon" type="image/png" href="{% static 'favicon.png' %}" >
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+      .card {
+          transition: all 0.3s ease;
+      }
+      .card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0, 0, 0, .12), 0 4px 8px rgba(0, 0, 0, .06);
+      }
+      .card-body .display-4 {
+          transition: all 0.3s ease;
+      }
+      .card:hover .card-body .display-4 {
+          transform: scale(1.1);
+      }
+    </style>
   </head>
   <body>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,8 +35,53 @@
   {% include "header_search.html" %}
 
     <div>
-        <h1 class="m-4 text-center">{{ runner.fullname }}</h1>
+        <h1 class="text-center">{{ runner.fullname }}</h1>
+      <h2 class="m-4 text-center"><strong>{{ runner.elo }}</strong> ELO</h2>
       <div class="container" align="center">
+        <div class="container">
+          <div class="row row-cols-1 row-cols-md-4 g-4">
+            <div class="col">
+              <div class="card h-60 text-center shadow">
+                <div class="card-body">
+                  <h4 class="card-title mb-2">{{ number_of_results }}</h4>
+                  <p class="card-text text-muted">Number of results</p>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="card h-60 text-center shadow">
+                <div class="card-body">
+                  <h4 class="card-title mb-2">{{ pm_percentage }}%</h4>
+                  <p class="card-text text-muted">NCL percentage</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col">
+              <div class="card h-60 text-center shadow">
+                <div class="card-body">
+                  {% if highest_elo == "-" %}
+                  <h4 class="card-title mb-2">Not applicable</h4>
+                  {% else %}
+                  <h4 class="card-title mb-2">{{ highest_elo }}</h4>
+                  {% endif %}
+                  <p class="card-text text-muted">Highest ELO</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col">
+              <div class="card h-60 text-center shadow">
+                <div class="card-body">
+                  <h4 class="card-title mb-2">{{ total_time }}</h4>
+                  <p class="card-text text-muted">Total time running</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
         <div class="col-xl-10 text-center m-2">
           <canvas id="myChart"></canvas>
           <button type="button" class="m-2 btn btn-primary" onclick="theChart.resetZoom()">Reset zoom</button>

@@ -40,7 +40,15 @@ def detail(request, runner_id):
     runner = get_object_or_404(Runner, helga_id=runner_id)
     template = loader.get_template("elo/runner.html")
     results = Result.objects.filter(runner=runner).order_by("-date")
-    context = {"runner": runner, "results": results}
+    total_delta = [datetime.timedelta(hours=result.time.hour,minutes=result.time.minute,seconds=result.time.second).total_seconds() for result in results if result.time is not None]
+    context = {
+        "runner": runner,
+        "results": results,
+        "number_of_results": len(results.exclude(status="DNS")),
+        "pm_percentage": round(100*len(results.filter(status="NCL"))/len(results.exclude(status="DNS")), 2),
+        "highest_elo": max(results[:len(results)-30], key=lambda x: x.new_elo).new_elo if len(results) > 30 else "-",
+        "total_time": datetime.timedelta(seconds=sum(total_delta))
+    }
     return HttpResponse(template.render(context, request))
 
 
