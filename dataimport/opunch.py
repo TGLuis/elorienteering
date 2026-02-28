@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 import xmltodict
@@ -7,14 +8,13 @@ ov_url = "https://www.opunch.org/organization/OV/members?key={}"
 frso_url = "https://www.opunch.org/organization/FRSO/members?key={}"
 
 
-def import_fede_members(fede_content):
-    fede_members = xmltodict.parse(fede_content)
+def import_fede_members(fede_members, fede_name):
     for competitor in fede_members["CompetitorList"]["Competitor"]:
         name = f"{competitor['Person']['Name']['Given']} {competitor['Person']['Name']['Family']}"
         try:
             runner = Runner.objects.get(fullname=name)
             runner.abso = competitor["Organisation"]["Id"]["@type"] == "ABSO"
-            runner.fede = competitor["Organisation"]["Name"]
+            runner.fede = fede_name
             runner.club = competitor["Organisation"]["ShortName"]
             runner.nationality = competitor["Person"]["Nationality"]["@code"]
             runner.sex = competitor["Person"]["@sex"]
@@ -32,9 +32,15 @@ def import_fede_members(fede_content):
 def import_be():
     key = os.environ.get("OPUNCH_KEY")
     ov_request = requests.get(ov_url.format(key))
-    import_fede_members(ov_request.content)
+    fede_members = xmltodict.parse(ov_request.content)
+    with open("dataimport/data/ov.json", "w+") as f:
+        json.dump(fede_members, f)
+    import_fede_members(fede_members, "ov")
     frso_request = requests.get(frso_url.format(key))
-    import_fede_members(frso_request.content)
+    fede_members = xmltodict.parse(frso_request.content)
+    with open("dataimport/data/frso.json", "w+") as f:
+        json.dump(fede_members, f)
+    import_fede_members(fede_members, "frso")
 
 
 if __name__ == "__main__":

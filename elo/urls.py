@@ -6,6 +6,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("compare", views.compare, name="compare"),
     path("ranking/<int:ranking_id>/", views.ranking, name="ranking"),
+    path("belgium/", views.belgium, name="belgium"),
     path("categories", views.categories, name="categories"),
     path("category/<str:category_name>/", views.category, name="category"),
     path("about", views.about, name="about"),
