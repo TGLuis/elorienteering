@@ -72,9 +72,24 @@ def get_category(request, category_name):
     nav = Navigation(pages, page_number)
     current_page = pages.page(page_number)
     the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
-    context = {"runners" : the_runners, "nav": nav, "base": f"category/{category_name}/", "category_name": category_name}
+    context = {"runners" : the_runners, "nav": nav, "base": f"category/{category_name}/", "category_name": category_name, "title": f"Belgian Ranking - {category_name}"}
     return HttpResponse(template.render(context, request))
 
+def belgium(request):
+    fede = request.GET.get("fede", "-")
+    runners = Runner.objects.filter(abso=True, number_of_valid_courses__gte=3)
+    fedes = ["FRSO", "OV"]
+    if fede in fedes:
+        runners = runners.filter(fede=fede)
+    runners = runners.order_by("-elo")
+    template = loader.get_template("elo/category.html")
+    pages = Paginator(runners, 100)
+    page_number = int(request.GET.get("page", "1"))
+    nav = Navigation(pages, page_number)
+    current_page = pages.page(page_number)
+    the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
+    context = {"runners" : the_runners, "nav": nav, "base": f"belgium/", "other_params": f"&fede={fede}", "title": f"Belgian Ranking{ '' if (fede not in fedes) else (' - ' + fede)}"}
+    return HttpResponse(template.render(context, request))
 
 def restless(request):
     years = list(range(2005,datetime.date.today().year+1))

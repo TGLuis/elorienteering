@@ -9,6 +9,7 @@ urlpatterns = [
     path("restless/", views.restless, name="restless"),
     path("categories", views.get_categories, name="categories"),
     path("category/<str:category_name>/", views.get_category, name="category"),
+    path("belgium/", views.belgium, name="belgium"),
     path("about", views.about, name="about"),
     path("<int:runner_id>/", views.detail, name="runner"),
     path("api/runner/<int:runner_id>/", views.runner_data, name="runner_data"),
