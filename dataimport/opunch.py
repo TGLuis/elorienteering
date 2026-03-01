@@ -35,12 +35,12 @@ def import_be():
     fede_members = xmltodict.parse(ov_request.content)
     with open("dataimport/data/ov.json", "w+") as f:
         json.dump(fede_members, f)
-    import_fede_members(fede_members, "ov")
+    import_fede_members(fede_members, "OV")
     frso_request = requests.get(frso_url.format(key))
     fede_members = xmltodict.parse(frso_request.content)
     with open("dataimport/data/frso.json", "w+") as f:
         json.dump(fede_members, f)
-    import_fede_members(fede_members, "frso")
+    import_fede_members(fede_members, "FRSO")
 
 
 if __name__ == "__main__":

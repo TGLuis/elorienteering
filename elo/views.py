@@ -60,9 +60,9 @@ def category(request, category_name):
     return HttpResponse(template.render(context, request))
 
 def belgium(request):
-    fede = request.GET.get("fede", "None")
+    fede = request.GET.get("fede", "-")
     runners = Runner.objects.filter(abso=True, number_of_valid_courses__gte=3)
-    fedes = ["frso", "ov"]
+    fedes = ["FRSO", "OV"]
     if fede in fedes:
         runners = runners.filter(fede=fede)
     runners = runners.order_by("-elo")
