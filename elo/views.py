@@ -60,8 +60,21 @@ def get_categories(request):
     categories = [{"man": homme, "woman": dame} for homme,dame in zip_longest(hommes, dames, fillvalue="")]
     return HttpResponse(template.render({"categories": categories}, request))
 
+def get_sex_category(request, category_name):
+    template = loader.get_template("elo/category.html")
+    sex = "M" if category_name == "Men" else "F"
+    runners = Runner.objects.filter(sex=sex, number_of_valid_courses__gte=3).order_by("-elo")
+    pages = Paginator(runners, 100)
+    page_number = int(request.GET.get("page", "1"))
+    nav = Navigation(pages, page_number)
+    current_page = pages.page(page_number)
+    the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
+    context = {"runners" : the_runners, "nav": nav, "base": f"category/{category_name}/", "category_name": category_name, "title": f"Belgian Ranking - {category_name}"}
+    return HttpResponse(template.render(context, request))
 
 def get_category(request, category_name):
+    if category_name in ["Men", "Women"]:
+        return get_sex_category(request, category_name)
     categories = get_all_categories_from_cache()
     if category_name not in categories:
         raise Http404("Ranking does not exist")
