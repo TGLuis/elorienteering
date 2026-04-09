@@ -74,10 +74,10 @@ def get_helga_id(runner_name):
     if response.text == "" and "'" in runner_name:
         user_name_request = runner_name.replace("'", "&#39;")
         response = requests.get(f"https://helga-o.com/webres/searchrunner.php?q={urllib.parse.quote(user_name_request, safe='')}")
-        return int(re.findall(r"runner=(\d+).*?>" + re.escape(user_name_request), response.text)[0])
+        return int(re.findall(r"runner=(\d+)[^<]*?>" + re.escape(user_name_request), response.text)[0])
     else:
         print(f"Requesting helga_id for runner: {runner_name}")
-        return int(re.findall(r"runner=(\d+).*?>" + re.escape(runner_name), response.text)[0])
+        return int(re.findall(r"runner=(\d+)[^<]*?>" + re.escape(runner_name), response.text)[0])
 
 
 def is_vacant_result(result_json):
