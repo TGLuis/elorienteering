@@ -52,7 +52,7 @@ class Ranking(models.Model):
 class Result(models.Model):
     date = models.DateTimeField(db_index=True)
     ranking = models.ForeignKey(Ranking, on_delete=models.CASCADE)
-    runner = models.ForeignKey(Runner, on_delete=models.CASCADE)
+    runner = models.ForeignKey(Runner, on_delete=models.CASCADE) # todo no replace with null ?
     place = models.IntegerField()
     time = models.TimeField(null=True)
     status = models.CharField()

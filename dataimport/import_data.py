@@ -79,7 +79,7 @@ def add_courses_json_to_db():
 
 
 default_elo = 1600
-def get_k_base(cur_result, n, number_of_previous_results):
+def get_k_base(n, number_of_previous_results):
     # ! k_base should be divided by the number of updates !
     if number_of_previous_results < 5:
         k_base = 200
@@ -187,7 +187,7 @@ def compute_elo_diff(ranking):
             only_one_runner(cur_result)
             continue
 
-        k_base = get_k_base(cur_result, n, number_of_previous_results)
+        k_base = get_k_base(n, number_of_previous_results)
 
         elo_change = get_elo_change(cur_result, k_base, other_results)
         save_elo_change(cur_result, elo_change)
@@ -281,7 +281,7 @@ def set_runner_inactive(last_year):
         c.execute(f"""UPDATE elo_runner SET active=1 WHERE id IN (SELECT elo_runner.id FROM elo_runner JOIN elo_result ON elo_runner.id=elo_result.runner_id WHERE elo_result.date >= '{beginning_of_last_year.strftime("%Y-%m-%d")}' AND elo_result.date < '{beginning_of_this_year}');""")
 
 
-def update_elo_runners_inactives(last_year):
+def update_elo_runners_inactives():
     with connection.cursor() as cursor:
         cursor.execute("UPDATE elo_runner SET elo = ROUND(elo * 0.985, 2) WHERE active=0;")
 
@@ -293,7 +293,7 @@ def elo_for_courses():
         course_year = course.date.year
         if course_year > year:
             set_runner_inactive(year)
-            update_elo_runners_inactives(year)
+            update_elo_runners_inactives()
             year = course_year
         print(f"{course.helga_id}", end=", ", flush=True)
         rankings = Ranking.objects.filter(course=course)
