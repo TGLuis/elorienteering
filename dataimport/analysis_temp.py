@@ -6,8 +6,8 @@ from elo.models import Runner, Course, Ranking, Result
 
 
 def display_course_elo_change(helga_id):
-    course = Course.objects.get(helga_id=helga_id)
-    rankings = Ranking.objects.filter(course__helga_id=helga_id)
+    course = Course.objects.get(source_id=helga_id)
+    rankings = Ranking.objects.filter(course__source_id=helga_id)
     print(course)
     print("="*20)
     for ranking in rankings:

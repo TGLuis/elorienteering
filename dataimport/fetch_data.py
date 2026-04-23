@@ -164,14 +164,14 @@ def pre_process(helga_id, course_file):
     if all([re.findall(r"[HD]:.*", category_name) for category_name in categories.keys()]):
         print(f"Merging HD for course: {helga_id} - {course_json['name']}")
         course_json["categories"] = merge_DH(categories)
-        if course_db := Course.objects.filter(helga_id=helga_id):
+        if course_db := Course.objects.filter(source_id=helga_id):
             course_db.delete()
         with open(course_file, "w+") as f:
             json.dump(course_json, f, indent=4)
     elif all([is_relay(category) for category in categories.values()]):
         print(f"Splitting relay for course: {helga_id} - {course_json['name']}")
         course_json["categories"] = split_relay(categories)
-        if course_db := Course.objects.filter(helga_id=helga_id):
+        if course_db := Course.objects.filter(source_id=helga_id):
             course_db.delete()
         with open(course_file, "w+") as f:
             json.dump(course_json, f, indent=4)

@@ -37,7 +37,7 @@ def add_courses_json_to_db():
     for course_id in all_ids:
         with open(f"{DIR_PATH}/data/courses/{course_id}.json") as f:
             print(course_id, end=", ", flush=True)
-            if Course.objects.filter(helga_id=course_id).first() is not None:
+            if Course.objects.filter(source_id=course_id).first() is not None:
                 continue
             course_json = json.load(f)
             course = Course()

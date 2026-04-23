@@ -1,4 +1,5 @@
 from django.db import models
+from elo.sources import Source
 
 class PageView(models.Model):
     path = models.CharField(max_length=255, unique=True)
@@ -28,15 +29,16 @@ class Runner(models.Model):
 class Course(models.Model):
     name = models.CharField()
     date = models.DateTimeField(db_index=True)
-    helga_id = models.IntegerField(default=0)
+    source_id = models.IntegerField(default=0)
     location = models.CharField()
     status = models.IntegerField(null=True)
+    source = models.IntegerField(default=1)
 
     def get_year(self):
         return self.date.year
 
     def __str__(self):
-        return f"{self.name} - {self.date} - {self.location}"
+        return f"{Source(self.source).name} - {self.name} - {self.date} - {self.location}"
 
 
 class Ranking(models.Model):
