@@ -10,12 +10,14 @@ import urllib.parse
 
 from datetime import datetime, time
 
-from elo.models import Course
+from dataimport.calculate import DIR_PATH
+from elo.models import Course, Runner, Ranking, Result
+from elo.fields import *
 
 DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
 
 
-def get_new_courses():
+def download_courses():
     urls = [
         "https://helga-o.com/webres/index.php?year=3&country=BEL&lang=&setfilter=1&orga=0",
         "https://helga-o.com/webres/index.php?year=3&country=FRA&lang=&setfilter=1&orga=0",
@@ -23,6 +25,9 @@ def get_new_courses():
         "https://helga-o.com/webres/index.php?year=3&country=LUX&lang=&setfilter=1&orga=0",
         "https://helga-o.com/webres/index.php?year=3&country=NED&lang=&setfilter=1&orga=0",
     ]
+    courses_to_download = Course.objects.filter(source=Source.HELGA_WEBRES,status=CourseStatus.TODOWNLOAD)
+    courses_to_download_ids = [str(c.source_id) for c in courses_to_download]
+    print(f"{courses_to_download_ids=}")
     for url in urls:
         headers = {
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
@@ -40,10 +45,12 @@ def get_new_courses():
             "upgrade-insecure-requests": "1"
           }
         response = requests.get(url, headers=headers)
-        course_ids = sorted(re.findall(r"lauf=(\d+)", response.text))
+        course_ids = sorted(list(set(re.findall(r"lauf=(\d+)", response.text))))
         for course_id in course_ids:
-            filename = f"{DIR_PATH}/data/courses/{course_id}.json"
-            if not os.path.exists(filename):
+            filename = f"{DIR_PATH}/data/courses/helga/{course_id}.json"
+            if (not os.path.exists(filename)) or (course_id in courses_to_download_ids):
+                if course_id in courses_to_download_ids:
+                    courses_to_download.filter(source_id=course_id).update(status=CourseStatus.TOIMPORT)
                 with open(filename, "w") as f:
                     response = requests.get(f"https://helga-o.com/webres/ws.php?lauf={course_id}")
                     f.write(response.text)
@@ -53,12 +60,12 @@ def get_new_courses():
 
 def get_courses_ids():
     all_filenames = []
-    for (dirpath, dirnames, filenames) in os.walk(f"{DIR_PATH}/data/courses"):
+    for (dirpath, dirnames, filenames) in os.walk(f"{DIR_PATH}/data/courses/helga"):
         all_filenames = filenames
     all_courses = []
     for filename in all_filenames:
         try:
-            with open(f"{DIR_PATH}/data/courses/{filename}") as f:
+            with open(f"{DIR_PATH}/data/courses/helga/{filename}") as f:
                 f.readline()
                 date = datetime.fromisoformat(f.readline().split('"')[3])
                 all_courses.append({"id": filename.split(".")[0], "date": date})
@@ -164,21 +171,86 @@ def pre_process(helga_id, course_file):
     if all([re.findall(r"[HD]:.*", category_name) for category_name in categories.keys()]):
         print(f"Merging HD for course: {helga_id} - {course_json['name']}")
         course_json["categories"] = merge_DH(categories)
-        if course_db := Course.objects.filter(source_id=helga_id):
-            course_db.delete()
         with open(course_file, "w+") as f:
             json.dump(course_json, f, indent=4)
     elif all([is_relay(category) for category in categories.values()]):
         print(f"Splitting relay for course: {helga_id} - {course_json['name']}")
         course_json["categories"] = split_relay(categories)
-        if course_db := Course.objects.filter(source_id=helga_id):
-            course_db.delete()
         with open(course_file, "w+") as f:
             json.dump(course_json, f, indent=4)
 
 def iterate_over_all_course_files():
     all_filenames = []
-    for (dirpath, dirnames, filenames) in os.walk(f"{DIR_PATH}/data/courses"):
+    for (dirpath, dirnames, filenames) in os.walk(f"{DIR_PATH}/data/courses/helga"):
         all_filenames = filenames
     for filename in all_filenames:
-        pre_process(filename.split(".")[0], f"{DIR_PATH}/data/courses/{filename}")
+        pre_process(filename.split(".")[0], f"{DIR_PATH}/data/courses/helga/{filename}")
+
+
+def get_runner_from_db(runner_name):
+    try:
+        return Runner.objects.get(fullname = runner_name)
+    except Runner.DoesNotExist:
+        runner = Runner(fullname=runner_name, helga_id=get_helga_id(runner_name))
+        runner.save()
+        return runner
+    except Exception as e:
+        if "get() returned more than one Runner" in str(e):
+            Runner.objects.filter(fullname=runner_name)[1].delete()
+            return get_runner_from_db(runner_name)
+        print("Exception in get_runner_from_db")
+        print(e)
+        print(runner_name)
+        exit()
+
+
+def import_courses_in_db():
+    all_ids = get_courses_ids()
+    for course_id in all_ids:
+        with open(f"{DIR_PATH}/data/courses/helga/{course_id}.json") as f:
+            db_course = Course.objects.filter(source_id=course_id).first()
+            if db_course is not None:
+                if db_course.status != CourseStatus.TOIMPORT:
+                    continue
+                else:
+                    db_course.delete()
+            print(course_id, end=", ", flush=True)
+            course_json = json.load(f)
+            course = Course()
+            course.source_id = course_id
+            course.name = course_json["name"]
+            course.date = datetime.strptime(course_json["date"], "%Y-%m-%dT%H:%M:%S%z")
+            course.location = course_json["location"]
+            course.status = CourseStatus.TOPROCESS
+            course.type = CourseType.UNKNOWN # TODO add some logic here ?
+            course.subtype = CourseSubType.UNKNOWN # TODO add some logic here ?
+            course.source = Source.HELGA_WEBRES
+            course.save()
+
+            results = []
+            for ranking_json in course_json["categories"].values():
+                ranking = Ranking()
+                ranking.course = course
+                ranking.name = ranking_json["name"]
+                ranking.distance = ranking_json["distance"]
+                ranking.climb = ranking_json["climb"]
+                ranking.save()
+
+                for result_json in ranking_json["results"]:
+                    if is_vacant_result(result_json):
+                        continue
+                    result = Result()
+                    result.ranking = ranking
+                    result.runner = get_runner_from_db(result_json["name"])
+                    result.place = result_json["position"]
+                    try:
+                        result.time = time.fromisoformat(result_json["time"])
+                    except:
+                        result.time = None
+                    result.status = result_json["status"]
+                    result.date = course.date
+                    result.startnumber = result_json.get("startnumber", 0)
+                    results.append(result)
+
+            Result.objects.bulk_create(results)
+    print("finished")

@@ -18,7 +18,7 @@ This project aims to do a classification based of elo calculations of the helga 
 - [x] handle better the relays (only compare with the same startnumber) for elo calculation.
 - [x] display the difference of elo gained over the course.
 - [x] search a runner with the search button.
-- [ ] Only compute new courses instead of everything from the start.
+- [x] Only compute new courses instead of everything from the start.
 - [x] Launch a cronjob with django to load courses and recompute elo everyday at 2AM.
 - [x] Using cache at least for index/about page
 - [x] add link to "challenge de régularité national" https://hoekx.be/natcrit/
@@ -69,4 +69,3 @@ Runner.objects.all().update(elo=1600.00, number_of_valid_courses=0)
 
 python manage.py makemigrations elo
 python manage.py migrate
-

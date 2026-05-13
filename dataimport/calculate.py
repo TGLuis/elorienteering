@@ -1,84 +1,16 @@
-import os 
-import json
-from datetime import datetime, time
+import os
+from datetime import datetime
 from django.db import transaction, connection
 from dateutil import tz
 
 from django.db.models import QuerySet
 from typing import Sequence
 
-
-from dataimport.fetch_data import get_new_courses, get_courses_ids, get_helga_id, is_vacant_result
-from elo.models import Runner, Course, Ranking, Result
+from elo.fields import CourseStatus
+from elo.models import Course, Ranking, Result
 
 DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
 
-
-def get_runner_from_db(runner_name):
-    try:
-        return Runner.objects.get(fullname = runner_name)
-    except Runner.DoesNotExist:
-        runner = Runner(fullname=runner_name, helga_id=get_helga_id(runner_name))
-        runner.save()
-        return runner
-    except Exception as e:
-        if "get() returned more than one Runner" in str(e):
-            Runner.objects.filter(fullname=runner_name)[1].delete()
-            return get_runner_from_db(runner_name)
-        print("Exception in get_runner_from_db")
-        print(e)
-        print(runner_name)
-        exit()
-
-
-def add_courses_json_to_db():
-    get_new_courses()
-    all_ids = get_courses_ids()
-    for course_id in all_ids:
-        with open(f"{DIR_PATH}/data/courses/{course_id}.json") as f:
-            print(course_id, end=", ", flush=True)
-            if Course.objects.filter(source_id=course_id).first() is not None:
-                continue
-            course_json = json.load(f)
-            course = Course()
-            course.helga_id = course_id
-            course.name = course_json["name"]
-            course.date = datetime.strptime(course_json["date"], "%Y-%m-%dT%H:%M:%S%z")
-            course.location = course_json["location"]
-            course.status = course_json["isLive"]
-            course.save()
-
-            results = []
-            for ranking_json in course_json["categories"].values():
-                ranking = Ranking()
-                ranking.course = course
-                ranking.name = ranking_json["name"]
-                ranking.distance = ranking_json["distance"]
-                ranking.climb = ranking_json["climb"]
-                ranking.save()
-
-                for result_json in ranking_json["results"]:
-                    if is_vacant_result(result_json):
-                        continue
-                    result = Result()
-                    result.ranking = ranking
-                    result.runner = get_runner_from_db(result_json["name"])
-                    result.place = result_json["position"]
-                    try:
-                        result.time = time.fromisoformat(result_json["time"])
-                    except:
-                        result.time = None
-                    result.status = result_json["status"]
-                    result.date = course.date
-                    result.startnumber = result_json.get("startnumber", 0)
-                    results.append(result)
-
-            Result.objects.bulk_create(results)
-    print("finished")
-
-
-
-default_elo = 1600
 def get_k_base(n, number_of_previous_results):
     # ! k_base should be divided by the number of updates !
     if number_of_previous_results < 5:
@@ -163,7 +95,7 @@ def get_real_opponents(number_of_previous_results, valid_results, cur_result):
 
 
 @transaction.atomic
-def compute_elo_diff(ranking):
+def compute_elo_diff(ranking: Ranking):
     results = Result.objects.filter(ranking=ranking)
     handle_result_not_OK(results)
 
@@ -192,6 +124,26 @@ def compute_elo_diff(ranking):
         elo_change = get_elo_change(cur_result, k_base, other_results)
         save_elo_change(cur_result, elo_change)
     save_all_runners(valid_results)
+
+
+@transaction.atomic
+def reverse_elo_diff(ranking: Ranking):
+    results = Result.objects.filter(ranking=ranking)
+
+    for result in results:
+        if result.status in ["NCL", "DSQ"]:
+            result.runner.elo = round(result.runner.elo - round(result.elo_diff, 2), 2)
+            result.runner.save()
+
+    valid_results = [result for result in results if result.place != 0]
+    if len(valid_results) in [0, 1]:
+        return
+
+    for result in valid_results:
+        runner = result.runner
+        runner.elo = round(result.new_elo - round(result.elo_diff, 2),2)
+        runner.number_of_valid_courses -= 1
+        runner.save()
 
 
 def save_elo_change(cur_result, elo_change):
@@ -228,7 +180,7 @@ def get_elo_change(cur_result, k_base, other_results):
 def first_three_results(cur_result, valid_results):
     new_elo = evaluate_first_elo(valid_results, cur_result)
     cur_result.new_elo = new_elo
-    cur_result.elo_diff = 0
+    cur_result.elo_diff = round(float(new_elo) - float(cur_result.runner.elo), 2)
     cur_result.save()
 
 
@@ -255,22 +207,17 @@ def handle_result_not_OK(results: QuerySet[Result, Result]):
             result.elo_diff = -round(float(result.runner.elo)*0.005, 2)
             result.new_elo = round(float(result.runner.elo) + float(result.elo_diff), 2)
             result.runner.elo = result.new_elo
-            result.runner.active = True
-            result.save()
-            result.runner.save()
         elif result.status == "DSQ":
             result.elo_diff = -round(float(result.runner.elo)*0.010, 2)
             result.new_elo = round(float(result.runner.elo) + float(result.elo_diff), 2)
             result.runner.elo = result.new_elo
-            result.runner.active = True
-            result.save()
-            result.runner.save()
         elif result.place == 0:
             result.new_elo = result.runner.elo
             result.elo_diff = 0
-            result.runner.active = True
-            result.save()
-            result.runner.save()
+
+        result.runner.active = True
+        result.save()
+        result.runner.save()
 
 
 def set_runner_inactive(last_year):
@@ -286,26 +233,44 @@ def update_elo_runners_inactives():
         cursor.execute("UPDATE elo_runner SET elo = ROUND(elo * 0.985, 2) WHERE active=0;")
 
 
+def reverse_update_elo_runners_inactives():
+    with connection.cursor() as cursor:
+        cursor.execute("UPDATE elo_runner SET elo = ROUND(elo / 0.985, 2) WHERE active=0;")
+
+
+
 def elo_for_courses():
-    courses = Course.objects.order_by("date")
-    year = 1900
+    print("process elo")
+    courses = Course.objects.filter(status=CourseStatus.TOPROCESS).order_by("date")
+    year = courses[0].date.year
     for course in courses:
         course_year = course.date.year
         if course_year > year:
             set_runner_inactive(year)
             update_elo_runners_inactives()
             year = course_year
-        print(f"{course.helga_id}", end=", ", flush=True)
+        print(f"{course.source_id}", end=", ", flush=True)
         rankings = Ranking.objects.filter(course=course)
         for ranking in rankings:
             compute_elo_diff(ranking)
     print()
-
-def import_all():
-    add_courses_json_to_db()
-    Runner.objects.all().update(elo=1600.00, number_of_valid_courses=0)
-    elo_for_courses()
+    courses.update(status=CourseStatus.DONE)
 
 
-if __name__ == "__main__":
-    import_all()
+def rollback_to_date(date: datetime):
+    date_str = date.isoformat(sep=" ", timespec="seconds")
+    courses = Course.objects.filter(date__gte=date_str).order_by("-date")
+    year = courses[0].date.year
+    print(f"Rolling back results up to {date_str} - {list(courses)}")
+    for course in courses:
+        course_year = course.date.year
+        if course_year < year:
+            set_runner_inactive(year-1)
+            reverse_update_elo_runners_inactives()
+            year = course_year
+        print(f"{course.source_id}", end=", ", flush=True)
+        rankings = Ranking.objects.filter(course=course)
+        for ranking in rankings:
+            reverse_elo_diff(ranking)
+    print()
+

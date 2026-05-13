@@ -133,7 +133,7 @@ def runner_data(request, runner_id):
 
 def runner_search(request):
     runners = Runner.objects.filter(fullname__icontains=request.GET['runner_pattern'])[:10]
-    return JsonResponse([{"name":runner.fullname,"url":f"/elo/{runner.helga_id}"} for runner in runners], safe=False)
+    return JsonResponse([{"name":runner.fullname,"url":f"/elo/runner/{runner.pk}"} for runner in runners], safe=False)
 
 
 def runner_compare(request):

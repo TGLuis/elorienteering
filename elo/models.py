@@ -1,5 +1,6 @@
 from django.db import models
-from elo.sources import Source
+from django_enum import EnumField
+from elo.fields import Source, CourseType, CourseSubType, CourseStatus
 
 class PageView(models.Model):
     path = models.CharField(max_length=255, unique=True)
@@ -12,7 +13,7 @@ class PageView(models.Model):
 class Runner(models.Model):
     fullname = models.CharField(db_index=True)
     helga_id = models.IntegerField(null=True, db_index=True)
-    elo = models.DecimalField(default=1500.0, max_digits=7, decimal_places=2, db_index=True)
+    elo = models.DecimalField(default=1600.0, max_digits=7, decimal_places=2, db_index=True)
     number_of_valid_courses = models.PositiveIntegerField(default=0, db_index=True)
     sex = models.CharField(default="", max_length=1)
     abso = models.BooleanField(default=False, db_index=True)
@@ -31,14 +32,16 @@ class Course(models.Model):
     date = models.DateTimeField(db_index=True)
     source_id = models.IntegerField(default=0)
     location = models.CharField()
-    status = models.IntegerField(null=True)
-    source = models.IntegerField(default=1)
+    status = EnumField(CourseStatus, default=CourseStatus.UNKNOWN)
+    source = EnumField(Source, default=Source.UNKNOWN)
+    type = EnumField(CourseType, default=CourseType.UNKNOWN)
+    subtype = EnumField(CourseSubType, default=CourseSubType.UNKNOWN)
 
     def get_year(self):
         return self.date.year
 
     def __str__(self):
-        return f"{Source(self.source).name} - {self.name} - {self.date} - {self.location}"
+        return f"{self.source.name} - {self.name} - {self.date} - {self.location} - {self.type.name} - {self.subtype.name}"
 
 
 class Ranking(models.Model):
@@ -59,7 +62,7 @@ class Result(models.Model):
     time = models.TimeField(null=True)
     status = models.CharField()
     elo_diff = models.DecimalField(default=0.00, max_digits=7, decimal_places=2)
-    new_elo = models.DecimalField(default=1500.0, max_digits=7, decimal_places=2)
+    new_elo = models.DecimalField(default=0.0, max_digits=7, decimal_places=2)
     startnumber = models.PositiveIntegerField(default=0)
 
     def __str__(self):
