@@ -250,9 +250,12 @@ def elo_for_courses():
             update_elo_runners_inactives()
             year = course_year
         print(f"{course.source_id}", end=", ", flush=True)
+        #print(f"{course.source.name} - {course.source_id}", end="\t", flush=True)
         rankings = Ranking.objects.filter(course=course)
         for ranking in rankings:
+            #print(f"{ranking.name}", end="\t", flush=True)
             compute_elo_diff(ranking)
+        print()
     print()
     courses.update(status=CourseStatus.DONE)
 

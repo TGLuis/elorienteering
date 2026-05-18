@@ -13,6 +13,7 @@ class PageView(models.Model):
 class Runner(models.Model):
     fullname = models.CharField(db_index=True)
     helga_id = models.IntegerField(null=True, db_index=True)
+    ffco_id = models.IntegerField(null=True, db_index=True)
     elo = models.DecimalField(default=1600.0, max_digits=7, decimal_places=2, db_index=True)
     number_of_valid_courses = models.PositiveIntegerField(default=0, db_index=True)
     sex = models.CharField(default="", max_length=1)

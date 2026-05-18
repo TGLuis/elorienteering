@@ -17,6 +17,7 @@ class CourseSubType(models.IntegerChoices):
     LONG = 1, "LD"
     MIDDLE = 2, "MD"
     SPRINT = 3, "sprint"
+    NIGHT = 4, "night"
 
 class CourseStatus(models.IntegerChoices):
     # Status of a course should go as following

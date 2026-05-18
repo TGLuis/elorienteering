@@ -10,7 +10,6 @@ import urllib.parse
 
 from datetime import datetime, time
 
-from dataimport.calculate import DIR_PATH
 from elo.models import Course, Runner, Ranking, Result
 from elo.fields import *
 
@@ -179,13 +178,6 @@ def pre_process(helga_id, course_file):
         with open(course_file, "w+") as f:
             json.dump(course_json, f, indent=4)
 
-def iterate_over_all_course_files():
-    all_filenames = []
-    for (dirpath, dirnames, filenames) in os.walk(f"{DIR_PATH}/data/courses/helga"):
-        all_filenames = filenames
-    for filename in all_filenames:
-        pre_process(filename.split(".")[0], f"{DIR_PATH}/data/courses/helga/{filename}")
-
 
 def get_runner_from_db(runner_name):
     try:
@@ -208,7 +200,7 @@ def import_courses_in_db():
     all_ids = get_courses_ids()
     for course_id in all_ids:
         with open(f"{DIR_PATH}/data/courses/helga/{course_id}.json") as f:
-            db_course = Course.objects.filter(source_id=course_id).first()
+            db_course = Course.objects.filter(source=Source.HELGA_WEBRES,source_id=course_id).first()
             if db_course is not None:
                 if db_course.status != CourseStatus.TOIMPORT:
                     continue

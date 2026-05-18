@@ -1,29 +1,23 @@
-from django.db import connection
 from datetime import datetime, timedelta, timezone
 
 from dataimport.calculate import elo_for_courses as process_elo, rollback_to_date
 from dataimport.helga_webres import download_courses as helga_download_courses
 from dataimport.helga_webres import import_courses_in_db as helga_import_courses
+from dataimport.ffco_cn import download_courses as ffco_download_courses
+from dataimport.ffco_cn import import_courses_in_db as ffco_import_courses
 from elo.models import Runner,Course
 from elo.fields import CourseStatus
 
 
-def setup(): # TODO only execute after first migration
-    # TODO manually
-    # mkdir dataimport/data/courses/helga
-    # mv dataimport/data/courses/*.json dataimport/data/courses/helga/
-    with connection.cursor() as cursor:
-        cursor.execute("UPDATE elo_course SET source=1;")
-
 def download_courses():
     print("download courses")
     helga_download_courses()
+    ffco_download_courses()
     
 def import_courses():
     print("import courses")
     helga_import_courses()
-
-
+    ffco_import_courses()
 
 def rerun_all():
     download_courses()

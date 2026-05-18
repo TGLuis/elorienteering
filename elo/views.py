@@ -1,4 +1,5 @@
 import datetime
+from itertools import chain
 
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404
@@ -30,10 +31,11 @@ def compare(request):
 
 def ranking(request, ranking_id):
     results = Result.objects.filter(ranking__pk=ranking_id)
+    ordered = chain(results.filter(status="OK").order_by("place"), results.exclude(status="OK").order_by("-status", "-new_elo"))
     if not results:
         raise Http404("Ranking does not exist")
     template = loader.get_template("elo/ranking.html")
-    return HttpResponse(template.render({"results": results, "ranking": results.first().ranking}, request))
+    return HttpResponse(template.render({"results": ordered, "ranking": results.first().ranking}, request))
 
 
 def detail(request, runner_id):
@@ -52,7 +54,7 @@ def detail(request, runner_id):
     return HttpResponse(template.render(context, request))
 
 
-def get_categories(request):
+def get_categories(request): # TODO make that filters
     template = loader.get_template("elo/categories.html")
     categories = get_all_categories_from_cache()
     dames = [category for category in categories if category and category[0] == "D"]
@@ -88,7 +90,7 @@ def get_category(request, category_name):
     context = {"runners" : the_runners, "nav": nav, "base": f"category/{category_name}/", "category_name": category_name, "title": f"Belgian Ranking - {category_name}"}
     return HttpResponse(template.render(context, request))
 
-def belgium(request):
+def belgium(request): # TODO filters with club ?
     fede = request.GET.get("fede", "-")
     runners = Runner.objects.filter(abso=True, number_of_valid_courses__gte=3)
     fedes = ["FRSO", "OV"]

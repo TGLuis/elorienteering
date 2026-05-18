@@ -5,3 +5,6 @@ gunicorn
 django-crontab
 xmltodict
 django-enum
+pandas
+chardet
+pytz
