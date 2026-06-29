@@ -4,12 +4,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Show the ranking for {{ ranking.course.name }} - {{ ranking.name }} that heppened the {{ ranking.course.date|date:'d/m/Y' }}">
     <title>ELOrienteering</title>
     <link rel="icon" type="image/png" href="{% static 'favicon.png' %}" >
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   </head>
   <body>
   {% include "header_search.html" %}
+
+  <main>
   <h1 class="m-4 text-center">{{ ranking.course.name }} - {{ ranking.name }}</h1>
   <h4 class="m-4 text-center">{{ ranking.course.date|date:"d/m/Y" }}</h4>
       <div class="container" align="center">
@@ -45,6 +48,7 @@
           <h3 class="m-4 text-center"><a href="https://helga-o.com/webres/index.php?lang=fr&lauf={{ ranking.course.source_id }}#{{ ranking.name }}">See on Helga</a></h3>
         </div>
       </div>
+  </main>
 
   {% include "footer.html" %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>

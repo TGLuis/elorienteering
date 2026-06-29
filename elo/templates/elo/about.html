@@ -4,12 +4,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="About page of elorienteering, it explains the objectives of the sites and how the algorithm works.">
     <title>About ELOrienteering</title>
     <link rel="icon" type="image/png" href="{% static 'favicon.png' %}" >
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   </head>
   <body>
-  {% include "header_search.html" %}
+  <main>
   <h1 class="m-4 text-center">About ELOrienteering</h1>
   <h2 class="m-4">Objective</h2>
   <p class="m-2 text-start">This website ranks orienteering runners based on <a href="https://helga-o.com/webres/">Helga Webres</a> results. The ranking is <b>NOT</b> used for country selection. It's designed to motivate runners to perform their best and track their progress. In Belgium, you also have the <a href="https://hoekx.be/natcrit/">challenge de régularité/regelmatigheidcriterium</a>.</p>
@@ -47,7 +48,7 @@
 
   <h2 class="m-4">Restless ranking</h2>
   <p class="m-2 text-start">This ranking classes people based on the number of "OK" results they have on Helga (NCL, DSQ, DNS,... are not counted), either in total or in a certain year.</p>
-
+  </main>
 
   {% include "footer.html" %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
