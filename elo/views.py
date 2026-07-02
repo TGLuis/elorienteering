@@ -6,20 +6,78 @@ from django.template import loader
 from django.core.paginator import Paginator
 from itertools import zip_longest
 
-from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache
+from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache, get_all_clubs_from_cache
 from .utils import Navigation
 from .models import Runner, Result
 
 
+def handle_filters(request):
+    params = {"countries": [], "sex": [], "age": [], "clubs": []}
+    other_params = []
+    countries = request.GET.get("countries")
+    if countries is not None:
+        params["countries"] = countries.split(",")
+        other_params.append("countries="+countries)
+    sex = request.GET.get("sex")
+    if sex is not None:
+        params["sex"] = sex.split(",")
+        other_params.append("sex="+sex)
+    age = request.GET.get("age")
+    if age is not None:
+        params["age"] = age.split(",")
+        other_params.append("age="+age)
+    clubs = request.GET.get("clubs")
+    if clubs is not None:
+        params["clubs"] = clubs.split(",")
+        other_params.append("clubs="+clubs)
+    return params, "&".join(other_params)
+
+def apply_filters(runners, filters):
+    if filters.get("countries"):
+        if filters.get("countries")[0] == "BEL":
+            runners = runners.filter(abso=True)
+    if filters.get("sex") and len(filters.get("sex")) == 1:
+        if filters.get("sex")[0] == "W":
+            runners = runners.filter(sex="F")
+        else:
+            runners = runners.filter(sex="M")
+    if filters.get("age"):
+        age_categories = ["D"+age for age in filters.get("age")] + ["H"+age for age in filters.get("age")]
+        runners = runners.filter(category__in=age_categories)
+    if filters.get("clubs"):
+        runners = runners.filter(club__in=filters.get("clubs"))
+    return runners
+
+def set_all_filters(filters_selected):
+    categories = get_all_categories_from_cache()
+    age_categories = sorted({category[1:] for category in categories})
+    clubs = get_all_clubs_from_cache()
+    all_filters = {
+        "countries": {"BEL": "BEL" in filters_selected["countries"]},
+        "sex": {"M": "M" in filters_selected["sex"], "W": "W" in filters_selected["sex"]},
+        "age": {age: age in filters_selected["age"] for age in age_categories},
+        "clubs": {club: club in filters_selected["clubs"] for club in clubs}
+    }
+    return all_filters
+
+
 def index(request):
-    runners = get_main_ranking_from_cache()
+    filters_selected, other_params = handle_filters(request)
+    runners = apply_filters(get_main_ranking_from_cache(), filters_selected)
     pages = Paginator(runners, 100)
     page_number = int(request.GET.get("page", "1"))
     nav = Navigation(pages, page_number)
     current_page = pages.page(page_number)
     template = loader.get_template("elo/index.html")
     the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
-    context = {"runners" : the_runners, "nav": nav}
+    all_filters = set_all_filters(filters_selected)
+    context = {
+        "runners" : the_runners,
+        "nav": nav,
+        "all_filters": all_filters,
+        "other_params": "&"+other_params,
+        "badges": other_params.split("&")
+    }
     return HttpResponse(template.render(context, request))
 
 
