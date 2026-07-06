@@ -5,22 +5,79 @@ from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.template import loader
 from django.core.paginator import Paginator
-from itertools import zip_longest
 
-from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache
+from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache, get_all_clubs_from_cache
 from .utils import Navigation
 from .models import Runner, Result
 
 
+def handle_filters(request):
+    params = {"countries": [], "sex": [], "age": [], "clubs": []}
+    other_params = []
+    countries = request.GET.get("countries")
+    if countries is not None:
+        params["countries"] = countries.split(",")
+        other_params.append("countries="+countries)
+    sex = request.GET.get("sex")
+    if sex is not None:
+        params["sex"] = sex.split(",")
+        other_params.append("sex="+sex)
+    age = request.GET.get("age")
+    if age is not None:
+        params["age"] = age.split(",")
+        other_params.append("age="+age)
+    clubs = request.GET.get("clubs")
+    if clubs is not None:
+        params["clubs"] = clubs.split(",")
+        other_params.append("clubs="+clubs)
+    return params, "&".join(other_params)
+
+def apply_filters(runners, filters):
+    if filters.get("countries"):
+        if filters.get("countries")[0] == "BEL":
+            runners = runners.filter(abso=True)
+    if filters.get("sex") and len(filters.get("sex")) == 1:
+        if filters.get("sex")[0] == "W":
+            runners = runners.filter(sex="F")
+        else:
+            runners = runners.filter(sex="M")
+    if filters.get("age"):
+        age_categories = ["D"+age for age in filters.get("age")] + ["H"+age for age in filters.get("age")]
+        runners = runners.filter(category__in=age_categories)
+    if filters.get("clubs"):
+        runners = runners.filter(club__in=filters.get("clubs"))
+    return runners
+
+def set_all_filters(filters_selected):
+    categories = get_all_categories_from_cache()
+    age_categories = sorted({category[1:] for category in categories})
+    clubs = get_all_clubs_from_cache()
+    all_filters = {
+        "countries": {"BEL": "BEL" in filters_selected["countries"]},
+        "sex": {"M": "M" in filters_selected["sex"], "W": "W" in filters_selected["sex"]},
+        "age": {age: age in filters_selected["age"] for age in age_categories},
+        "clubs": {club: club in filters_selected["clubs"] for club in clubs}
+    }
+    return all_filters
+
+
 def index(request):
-    runners = get_main_ranking_from_cache()
+    filters_selected, other_params = handle_filters(request)
+    runners = apply_filters(get_main_ranking_from_cache(), filters_selected)
     pages = Paginator(runners, 100)
     page_number = int(request.GET.get("page", "1"))
     nav = Navigation(pages, page_number)
     current_page = pages.page(page_number)
     template = loader.get_template("elo/index.html")
     the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
-    context = {"runners" : the_runners, "nav": nav}
+    all_filters = set_all_filters(filters_selected)
+    context = {
+        "runners" : the_runners,
+        "nav": nav,
+        "all_filters": all_filters,
+        "other_params": "&"+other_params,
+        "badges": other_params.split("&")
+    }
     return HttpResponse(template.render(context, request))
 
 
@@ -53,58 +110,6 @@ def detail(request, runner_id):
     }
     return HttpResponse(template.render(context, request))
 
-
-def get_categories(request): # TODO make that filters
-    template = loader.get_template("elo/categories.html")
-    categories = get_all_categories_from_cache()
-    dames = [category for category in categories if category and category[0] == "D"]
-    hommes = [category for category in categories if category and category[0] == "H"]
-    categories = [{"man": homme, "woman": dame} for homme,dame in zip_longest(hommes, dames, fillvalue="")]
-    return HttpResponse(template.render({"categories": categories}, request))
-
-def get_sex_category(request, category_name):
-    template = loader.get_template("elo/category.html")
-    sex = "M" if category_name == "Men" else "F"
-    runners = Runner.objects.filter(sex=sex, number_of_valid_courses__gte=3).order_by("-elo")
-    pages = Paginator(runners, 100)
-    page_number = int(request.GET.get("page", "1"))
-    nav = Navigation(pages, page_number)
-    current_page = pages.page(page_number)
-    the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
-    context = {"runners" : the_runners, "nav": nav, "base": f"category/{category_name}/", "category_name": category_name, "title": f"Belgian Ranking - {category_name}"}
-    return HttpResponse(template.render(context, request))
-
-def get_category(request, category_name):
-    if category_name in ["Men", "Women"]:
-        return get_sex_category(request, category_name)
-    categories = get_all_categories_from_cache()
-    if category_name not in categories:
-        raise Http404("Ranking does not exist")
-    template = loader.get_template("elo/category.html")
-    runners = Runner.objects.filter(category=category_name, number_of_valid_courses__gte=3).order_by("-elo")
-    pages = Paginator(runners, 100)
-    page_number = int(request.GET.get("page", "1"))
-    nav = Navigation(pages, page_number)
-    current_page = pages.page(page_number)
-    the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
-    context = {"runners" : the_runners, "nav": nav, "base": f"category/{category_name}/", "category_name": category_name, "title": f"Belgian Ranking - {category_name}"}
-    return HttpResponse(template.render(context, request))
-
-def belgium(request): # TODO filters with club ?
-    fede = request.GET.get("fede", "-")
-    runners = Runner.objects.filter(abso=True, number_of_valid_courses__gte=3)
-    fedes = ["FRSO", "OV"]
-    if fede in fedes:
-        runners = runners.filter(fede=fede)
-    runners = runners.order_by("-elo")
-    template = loader.get_template("elo/category.html")
-    pages = Paginator(runners, 100)
-    page_number = int(request.GET.get("page", "1"))
-    nav = Navigation(pages, page_number)
-    current_page = pages.page(page_number)
-    the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
-    context = {"runners" : the_runners, "nav": nav, "base": f"belgium/", "other_params": f"&fede={fede}", "title": f"Belgian Ranking{ '' if (fede not in fedes) else (' - ' + fede)}"}
-    return HttpResponse(template.render(context, request))
 
 def restless(request):
     years = list(range(2005,datetime.date.today().year+1))

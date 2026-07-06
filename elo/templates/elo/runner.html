@@ -4,6 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="This is the page with the results of {{ runner.fullname }}. You can see the elo eveolution one race after the other.">
     <title>ELOrienteering</title>
     <link rel="icon" type="image/png" href="{% static 'favicon.png' %}" >
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
@@ -33,6 +34,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>
 
   {% include "header_search.html" %}
+
+  <main>
 
     <div>
         <h1 class="text-center">{{ runner.fullname }}</h1>
@@ -155,6 +158,7 @@
       </table>
       </div>
     </div>
+  </main>
 
   {% include "footer.html" %}
   </body>

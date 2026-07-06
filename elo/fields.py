@@ -28,4 +28,5 @@ class CourseStatus(models.IntegerChoices):
     TODOWNLOAD = 1, "to download"
     TOIMPORT = 2, "to import"
     TOPROCESS = 3, "to process"
+    FUTURE = 9, "future course" # Only there for prediction of a course
     DONE = 10, "done"

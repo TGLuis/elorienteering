@@ -16,12 +16,12 @@ class Runner(models.Model):
     ffco_id = models.IntegerField(null=True, db_index=True)
     elo = models.DecimalField(default=1600.0, max_digits=7, decimal_places=2, db_index=True)
     number_of_valid_courses = models.PositiveIntegerField(default=0, db_index=True)
-    sex = models.CharField(default="", max_length=1)
+    sex = models.CharField(default="", max_length=1) # TODO replace with enum
     abso = models.BooleanField(default=False, db_index=True)
     fede = models.CharField(default="")
     club = models.CharField(default="")
     nationality = models.CharField(default="")
-    category = models.CharField(default="", max_length=5, db_index=True)
+    category = models.CharField(default="", max_length=5, db_index=True) # TODO replace with only age ?
     active = models.BooleanField(default=True, db_index=True)
 
     def __str__(self):
@@ -58,7 +58,7 @@ class Ranking(models.Model):
 class Result(models.Model):
     date = models.DateTimeField(db_index=True)
     ranking = models.ForeignKey(Ranking, on_delete=models.CASCADE)
-    runner = models.ForeignKey(Runner, on_delete=models.CASCADE) # todo no replace with null ?
+    runner = models.ForeignKey(Runner, on_delete=models.CASCADE)
     place = models.IntegerField()
     time = models.TimeField(null=True)
     status = models.CharField()

@@ -4,14 +4,54 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Home page of elorienteering, show the global ranking of orienteering runners.">
     <title>ELOrienteering</title>
     <link rel="icon" type="image/png" href="{% static 'favicon.png' %}" >
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   </head>
   <body>
   {% include "header_search.html" %}
+
+  <main>
   <h1 class="m-4 text-center">ELO Ranking</h1>
       <div class="container" align="center">
+
+            <div class="col-xl-10 m-2">
+              <div class="m-2 text-center">
+                  <a class="btn btn-primary" data-bs-toggle="collapse" href="#filters" role="button" aria-expanded="false" aria-controls="filters">
+                      Filters
+                        {% for badge in badges %}
+                          <span class="badge text-bg-info">{{ badge }}</span>
+                        {% endfor %}
+                  </a>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <div class="collapse" id="filters">
+                      <div class="card card-body text-start">
+                        {% for name, filters in all_filters.items %}
+                            <h4>{{ name }}</h4>
+                            <div class="row">
+                                <div class="form-group" id="{{ name }}">
+                                    {% for filter, checked in filters.items %}
+                                    <label class="form-check-label" for="{{ filter }}">
+                                        <input class="form-check-input" type="checkbox" value="" id="{{ filter }}" {% if checked %}checked{% endif %}>{{ filter }}
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <div class="m-2 text-center">
+                        <button class="btn btn-primary" role="button" onclick="fetch_with_filters()">
+                            Apply
+                        </button>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+            </div>
+
         <div class="col-xl-10 m-2">
           {% include "nav.html" %}
           <table class="m-2 table table-striped table-hover">
@@ -33,8 +73,44 @@
           {% include "nav.html" %}
         </div>
       </div>
+  </main>
 
   {% include "footer.html" %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script  type="text/javascript">
+        function fetch_with_filters() {
+            var parameters = []
+            var countries = get_selected_from_parentId("countries");
+            if (countries.length > 0) {
+                parameters.push("countries=" + countries.join(","));
+            }
+            var sex = get_selected_from_parentId("sex");
+            if (sex.length > 0) {
+                parameters.push("sex=" + sex.join(","));
+            }
+            var age = get_selected_from_parentId("age");
+            if (age.length > 0) {
+                parameters.push("age=" + age.join(","));
+            }
+            var clubs = get_selected_from_parentId("clubs");
+            if (clubs.length > 0) {
+                parameters.push("clubs=" + clubs.join(","));
+            }
+            params = parameters.join("&");
+            window.location = "?"+params;
+        }
+
+        function get_selected_from_parentId(parentId) {
+            var divChildren = document.getElementById(parentId).children;
+            var array = [];
+            for (var i = 0; i < divChildren.length; i++) {
+              var child = divChildren[i];
+              if (child.children[0].checked) {
+                array.push(child.children[0].id);
+              }
+            }
+            return array;
+        }
+    </script>
   </body>
 </html>

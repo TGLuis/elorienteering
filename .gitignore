@@ -4,5 +4,3 @@ __pycache__
 .idea
 .env
 nohup.out
-static/
-
