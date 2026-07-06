@@ -1,4 +1,3 @@
-from django.db import connection
 from datetime import datetime, timedelta, timezone
 
 from dataimport.calculate import elo_for_courses as process_elo, rollback_to_date
@@ -7,13 +6,6 @@ from dataimport.helga_webres import import_courses_in_db as helga_import_courses
 from elo.models import Runner,Course
 from elo.fields import CourseStatus
 
-
-def setup(): # TODO only execute after first migration
-    # TODO manually
-    # mkdir dataimport/data/courses/helga
-    # mv dataimport/data/courses/*.json dataimport/data/courses/helga/
-    with connection.cursor() as cursor:
-        cursor.execute("UPDATE elo_course SET source=1;")
 
 def download_courses():
     print("download courses")
