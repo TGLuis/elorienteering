@@ -38,7 +38,7 @@ def reverse_courses_toimport():
         the_date = oldest_toimport_course.date.isoformat(sep=" ", timespec="seconds")
         last_courses = Course.objects.filter(date__gte=the_date)
         last_courses.update(status=CourseStatus.TOIMPORT)
-    rollback_to_date(oldest_toimport_course.date)
+        rollback_to_date(oldest_toimport_course.date)
 
 
 def normal_run():

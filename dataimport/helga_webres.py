@@ -15,47 +15,25 @@ from elo.models import Course, Runner, Ranking, Result
 from elo.fields import *
 
 DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
-
+countries = ["BEL", "NED", "FRA", "LUX", "GER", "SWE"]
 
 def download_courses():
-    urls = [
-        "https://helga-o.com/webres/index.php?year=3&country=BEL&lang=&setfilter=1&orga=0",
-        "https://helga-o.com/webres/index.php?year=3&country=FRA&lang=&setfilter=1&orga=0",
-        "https://helga-o.com/webres/index.php?year=3&country=GER&lang=&setfilter=1&orga=0",
-        "https://helga-o.com/webres/index.php?year=3&country=LUX&lang=&setfilter=1&orga=0",
-        "https://helga-o.com/webres/index.php?year=3&country=NED&lang=&setfilter=1&orga=0",
-    ]
+    url = "https://helga-o.com/webres-api/ws-complist.php?top=100"
     courses_to_download = Course.objects.filter(source=Source.HELGA_WEBRES,status=CourseStatus.TODOWNLOAD)
     courses_to_download_ids = [str(c.source_id) for c in courses_to_download]
     print(f"{courses_to_download_ids=}")
-    for url in urls:
-        headers = {
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "accept-language": "fr-BE,fr;q=0.9,en-BE;q=0.8,en;q=0.7,nl-BE;q=0.6,nl;q=0.5,es-ES;q=0.4,es;q=0.3,sl-SI;q=0.2,sl;q=0.1,fr-FR;q=0.1,en-US;q=0.1",
-            "cache-control": "no-cache",
-            "pragma": "no-cache",
-            "priority": "u=0, i",
-            "sec-ch-ua": "\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "\"Windows\"",
-            "sec-fetch-dest": "document",
-            "sec-fetch-mode": "navigate",
-            "sec-fetch-site": "none",
-            "sec-fetch-user": "?1",
-            "upgrade-insecure-requests": "1"
-          }
-        response = requests.get(url, headers=headers)
-        course_ids = sorted(list(set(re.findall(r"lauf=(\d+)", response.text))))
-        for course_id in course_ids:
-            filename = f"{DIR_PATH}/data/courses/helga/{course_id}.json"
-            if (not os.path.exists(filename)) or (course_id in courses_to_download_ids):
-                if course_id in courses_to_download_ids:
-                    courses_to_download.filter(source_id=course_id).update(status=CourseStatus.TOIMPORT)
-                with open(filename, "w") as f:
-                    response = requests.get(f"https://helga-o.com/webres/ws.php?lauf={course_id}")
-                    f.write(response.text)
-                pre_process(course_id, filename)
-                sleep(2)
+    response = requests.get(url)
+    course_ids = [key for key, value in response.json()["Events"].items() if value["isLive"]==0 and value["CountryCode"] in countries]
+    for course_id in course_ids:
+        filename = f"{DIR_PATH}/data/courses/helga/{course_id}.json"
+        if (not os.path.exists(filename)) or (course_id in courses_to_download_ids):
+            if course_id in courses_to_download_ids:
+                courses_to_download.filter(source_id=course_id).update(status=CourseStatus.TOIMPORT)
+            with open(filename, "w") as f:
+                response = requests.get(f"https://helga-o.com/webres-api/ws.php?lauf={course_id}")
+                f.write(response.text)
+            pre_process(course_id, filename)
+            sleep(2)
 
 
 def get_courses_ids():
@@ -78,11 +56,11 @@ def get_courses_ids():
 
 
 def get_helga_id(runner_name):
-    response = requests.get(f"https://helga-o.com/webres/searchrunner.php?q={urllib.parse.quote(runner_name, safe='')}")
+    response = requests.get(f"https://helga-o.live/searchrunner.php?q={urllib.parse.quote(runner_name, safe='')}")
     print(f"Requesting helga_id for runner: {runner_name}")
     if response.text == "" and "'" in runner_name:
         user_name_request = runner_name.replace("'", "&#39;")
-        response = requests.get(f"https://helga-o.com/webres/searchrunner.php?q={urllib.parse.quote(user_name_request, safe='')}")
+        response = requests.get(f"https://helga-o.live/searchrunner.php?q={urllib.parse.quote(user_name_request, safe='')}")
         return int(re.findall(r"runner=(\d+)[^<]*?>" + re.escape(user_name_request), response.text)[0])
     else:
         return int(re.findall(r"runner=(\d+)[^<]*?>" + re.escape(runner_name), response.text)[0])

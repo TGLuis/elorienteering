@@ -15,7 +15,7 @@ DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
 
 def download_courses():
     urls = [
-        "https://www.helga-o.com/start/ws-complist.php?country=BEL"
+        "https://www.helga-o.com/start-api/ws-complist.php?country=BEL"
     ]
     for url in urls:
         headers = {
