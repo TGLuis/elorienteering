@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import logging
 
 from time import sleep
 
@@ -11,6 +12,7 @@ from datetime import datetime, time
 
 
 DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+logger = logging.getLogger(__name__)
 
 
 def download_courses():
@@ -34,9 +36,9 @@ def download_courses():
             "upgrade-insecure-requests": "1"
           }
         response = requests.get(url, headers=headers)
-        print(response)
-        # print(response.json())
-        print(response.text)
+        logger.info(response)
+        # logger.info(response.json())
+        logger.info(response.text)
 
 
 

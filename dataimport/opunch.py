@@ -1,11 +1,13 @@
 import json
 import os
+import logging
 import requests
 import xmltodict
 from elo.models import Runner
 
 ov_url = "https://www.opunch.org/organization/OV/members?key={}"
 frso_url = "https://www.opunch.org/organization/FRSO/members?key={}"
+logger = logging.getLogger(__name__)
 
 
 def import_fede_members(fede_members, fede_name):
@@ -21,11 +23,11 @@ def import_fede_members(fede_members, fede_name):
             runner.category = competitor["Class"]["Name"]
             runner.save()
         except Runner.DoesNotExist:
-            print("Runner does not have any result yet")
+            logger.info("Runner does not have any result yet")
         except Exception as e:
-            print("Exception in get_runner_from_db")
-            print(e)
-            print(name)
+            logger.error("Exception in get_runner_from_db")
+            logger.error(e)
+            logger.debug(name)
             exit()
 
 

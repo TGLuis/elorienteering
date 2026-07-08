@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import logging
 from collections import defaultdict
 
 from time import sleep
@@ -14,6 +15,7 @@ from dataimport.calculate import DIR_PATH
 from elo.models import Course, Runner, Ranking, Result
 from elo.fields import *
 
+logger = logging.getLogger(__name__)
 DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
 countries = ["BEL", "NED", "FRA", "LUX", "GER", "SWE"]
 
@@ -21,7 +23,7 @@ def download_courses():
     url = "https://helga-o.com/webres-api/ws-complist.php?top=100"
     courses_to_download = Course.objects.filter(source=Source.HELGA_WEBRES,status=CourseStatus.TODOWNLOAD)
     courses_to_download_ids = [str(c.source_id) for c in courses_to_download]
-    print(f"{courses_to_download_ids=}")
+    logger.debug(f"{courses_to_download_ids=}")
     response = requests.get(url)
     course_ids = [key for key, value in response.json()["Events"].items() if value["isLive"]==0 and value["CountryCode"] in countries]
     for course_id in course_ids:
@@ -48,8 +50,8 @@ def get_courses_ids():
                 date = datetime.fromisoformat(f.readline().split('"')[3])
                 all_courses.append({"id": filename.split(".")[0], "date": date})
         except Exception as e:
-            print(e)
-            print(filename)
+            logger.error(e)
+            logger.debug(filename)
             exit()
     all_courses.sort(key=lambda x: x["date"])
     return [course["id"] for course in all_courses]
@@ -57,7 +59,7 @@ def get_courses_ids():
 
 def get_helga_id(runner_name):
     response = requests.get(f"https://helga-o.live/searchrunner.php?q={urllib.parse.quote(runner_name, safe='')}")
-    print(f"Requesting helga_id for runner: {runner_name}")
+    logger.info(f"Requesting helga_id for runner: {runner_name}")
     if response.text == "" and "'" in runner_name:
         user_name_request = runner_name.replace("'", "&#39;")
         response = requests.get(f"https://helga-o.live/searchrunner.php?q={urllib.parse.quote(user_name_request, safe='')}")
@@ -147,12 +149,12 @@ def pre_process(helga_id, course_file):
         course_json = json.load(f)
     categories = course_json["categories"]
     if all([re.findall(r"[HD]:.*", category_name) for category_name in categories.keys()]):
-        print(f"Merging HD for course: {helga_id} - {course_json['name']}")
+        logger.info(f"Merging HD for course: {helga_id} - {course_json['name']}")
         course_json["categories"] = merge_DH(categories)
         with open(course_file, "w+") as f:
             json.dump(course_json, f, indent=4)
     elif all([is_relay(category) for category in categories.values()]):
-        print(f"Splitting relay for course: {helga_id} - {course_json['name']}")
+        logger.info(f"Splitting relay for course: {helga_id} - {course_json['name']}")
         course_json["categories"] = split_relay(categories)
         with open(course_file, "w+") as f:
             json.dump(course_json, f, indent=4)
@@ -176,9 +178,9 @@ def get_runner_from_db(runner_name):
         if "get() returned more than one Runner" in str(e):
             Runner.objects.filter(fullname=runner_name)[1].delete()
             return get_runner_from_db(runner_name)
-        print("Exception in get_runner_from_db")
-        print(e)
-        print(runner_name)
+        logger.error("Exception in get_runner_from_db")
+        logger.error(e)
+        logger.debug(runner_name)
         exit()
 
 
@@ -192,7 +194,7 @@ def import_courses_in_db():
                     continue
                 else:
                     db_course.delete()
-            print(course_id, end=", ", flush=True)
+            logger.info(course_id, end=", ", flush=True)
             course_json = json.load(f)
             course = Course()
             course.source_id = course_id
@@ -231,4 +233,4 @@ def import_courses_in_db():
                     results.append(result)
 
             Result.objects.bulk_create(results)
-    print("finished")
+    logger.info("finished")

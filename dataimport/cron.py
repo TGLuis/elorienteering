@@ -1,3 +1,5 @@
+import logging
+
 from datetime import datetime, timedelta, timezone
 
 from dataimport.calculate import elo_for_courses as process_elo, rollback_to_date
@@ -6,13 +8,15 @@ from dataimport.helga_webres import import_courses_in_db as helga_import_courses
 from elo.models import Runner,Course
 from elo.fields import CourseStatus
 
+logger = logging.getLogger(__name__)
+
 
 def download_courses():
-    print("download courses")
+    logger.info("download courses")
     helga_download_courses()
     
 def import_courses():
-    print("import courses")
+    logger.info("import courses")
     helga_import_courses()
 
 
@@ -25,14 +29,14 @@ def rerun_all():
     process_elo()
 
 def last_two_weeks_to_download():
-    print("Last two weeks to download")
+    logger.info("Last two weeks to download")
     the_date = datetime.now(timezone.utc) - timedelta(weeks=2)
     last_courses = Course.objects.filter(date__gte=the_date.isoformat(sep=" ", timespec="seconds"))
     if last_courses.count() > 1:
         last_courses.update(status=CourseStatus.TODOWNLOAD)
 
 def reverse_courses_toimport():
-    print("reverse courses toimport")
+    logger.info("reverse courses toimport")
     oldest_toimport_course = Course.objects.filter(status=CourseStatus.TOIMPORT).order_by("date").first()
     if oldest_toimport_course is not None:
         the_date = oldest_toimport_course.date.isoformat(sep=" ", timespec="seconds")
