@@ -1,4 +1,6 @@
 import os
+import logging
+
 from datetime import datetime
 from django.db import transaction, connection
 from dateutil import tz
@@ -10,6 +12,7 @@ from elo.fields import CourseStatus
 from elo.models import Course, Ranking, Result
 
 DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+logger = logging.getLogger(__name__)
 
 def get_k_base(n, number_of_previous_results):
     # ! k_base should be divided by the number of updates !
@@ -240,7 +243,7 @@ def reverse_update_elo_runners_inactives():
 
 
 def elo_for_courses():
-    print("process elo")
+    logger.info("process elo")
     courses = Course.objects.filter(status=CourseStatus.TOPROCESS).order_by("date")
     year = courses[0].date.year
     for course in courses:
@@ -249,14 +252,12 @@ def elo_for_courses():
             set_runner_inactive(year)
             update_elo_runners_inactives()
             year = course_year
-        print(f"{course.source_id}", end=", ", flush=True)
+        logger.debug(f"{course.source_id}", end=", ", flush=True)
         #print(f"{course.source.name} - {course.source_id}", end="\t", flush=True)
         rankings = Ranking.objects.filter(course=course)
         for ranking in rankings:
             #print(f"{ranking.name}", end="\t", flush=True)
             compute_elo_diff(ranking)
-        print()
-    print()
     courses.update(status=CourseStatus.DONE)
 
 
@@ -264,16 +265,15 @@ def rollback_to_date(date: datetime):
     date_str = date.isoformat(sep=" ", timespec="seconds")
     courses = Course.objects.filter(date__gte=date_str).order_by("-date")
     year = courses[0].date.year
-    print(f"Rolling back results up to {date_str} - {list(courses)}")
+    logger.info(f"Rolling back results up to {date_str} - {list(courses)}")
     for course in courses:
         course_year = course.date.year
         if course_year < year:
             set_runner_inactive(year-1)
             reverse_update_elo_runners_inactives()
             year = course_year
-        print(f"{course.source_id}", end=", ", flush=True)
+        logger.debug(f"{course.source_id}", end=", ", flush=True)
         rankings = Ranking.objects.filter(course=course)
         for ranking in rankings:
             reverse_elo_diff(ranking)
-    print()
 

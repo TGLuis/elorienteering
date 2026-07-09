@@ -104,7 +104,7 @@ def detail(request, runner_id):
         "runner": runner,
         "results": results,
         "number_of_results": len(results.exclude(status="DNS")),
-        "pm_percentage": round(100*len(results.filter(status="NCL"))/len(results.exclude(status="DNS")), 2),
+        "pm_percentage": round(100*len(results.filter(status="NCL"))/len(results.exclude(status="DNS")), 2) if len(results.exclude(status="DNS")) > 0 else "Not applicable",
         "highest_elo": max(results[:len(results)-30], key=lambda x: x.new_elo).new_elo if len(results) > 30 else "-",
         "total_time": datetime.timedelta(seconds=sum(total_delta))
     }
