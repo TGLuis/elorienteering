@@ -156,7 +156,7 @@ logging.config.dictConfig({
     'disable_existing_loggers': False,
     'formatters': {
         'default': {
-            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(message)s',
+            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(message)s',
         },
     },
     'handlers': {
@@ -165,7 +165,10 @@ logging.config.dictConfig({
             'formatter': 'default',
         },
         'file': {
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'formatter': 'default',
+            'maxBytes': 1024*1024*10, # 10 MB
+            'backupCount': 2,
             'filename': 'django.log'
         },
     },
