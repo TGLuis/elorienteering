@@ -252,7 +252,7 @@ def elo_for_courses():
             set_runner_inactive(year)
             update_elo_runners_inactives()
             year = course_year
-        logger.debug(f"{course.source_id}", end=", ", flush=True)
+        logger.debug(f"{course.source_id}")
         #print(f"{course.source.name} - {course.source_id}", end="\t", flush=True)
         rankings = Ranking.objects.filter(course=course)
         for ranking in rankings:
@@ -272,7 +272,7 @@ def rollback_to_date(date: datetime):
             set_runner_inactive(year-1)
             reverse_update_elo_runners_inactives()
             year = course_year
-        logger.debug(f"{course.source_id}", end=", ", flush=True)
+        logger.debug(f"{course.source_id}")
         rankings = Ranking.objects.filter(course=course)
         for ranking in rankings:
             reverse_elo_diff(ranking)

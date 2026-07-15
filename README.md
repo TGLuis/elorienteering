@@ -78,3 +78,13 @@ Runner.objects.all().update(elo=1600.00, number_of_valid_courses=0)
 
 python manage.py makemigrations elo
 python manage.py migrate
+
+import logging
+l = logging.getLogger('')
+l.setLevel(logging.DEBUG)
+l.addHandler(logging.StreamHandler())
+from dataimport.cron import *
+rerun_all()
+
+from elo.fields import *
+Course.objects.filter(source_id=6819,source=Source.HELGA_WEBRES)[0].delete()

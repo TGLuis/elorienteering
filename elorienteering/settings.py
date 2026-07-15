@@ -149,7 +149,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Clear prev config
 LOGGING_CONFIG = None
 # Get loglevel from env
-LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'info').upper()
+LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'INFO').upper()
 
 logging.config.dictConfig({
     'version': 1,
@@ -176,6 +176,7 @@ logging.config.dictConfig({
         'django': {
             'level': LOGLEVEL,
             'handlers': ['console', 'file',],
+            'propagate': True,
         },
     },
 })

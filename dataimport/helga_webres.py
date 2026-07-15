@@ -186,7 +186,7 @@ def import_courses_in_db():
                     continue
                 else:
                     db_course.delete()
-            logger.info(course_id, end=", ", flush=True)
+            logger.info(course_id)
             course_json = json.load(f)
             course = Course()
             course.source_id = course_id
