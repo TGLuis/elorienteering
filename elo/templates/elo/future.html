@@ -1,0 +1,47 @@
+<!doctype html>
+{% load static %}
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Predict the results of the course '{{ course.name }}' that will happen the {{ course.date|date:'d/m/Y' }}">
+    <title>ELOrienteering</title>
+    <link rel="icon" type="image/png" href="{% static 'favicon.png' %}" >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  </head>
+  <body>
+  {% include "header_search.html" %}
+
+  <main>
+  <h1 class="m-4 text-center">Prediction - {{ course.name }}</h1>
+  <h4 class="m-4 text-center">{{ course.location }} - {{ course.date|date:"d/m/Y" }}</h4>
+      <div class="container" align="center">
+        <div class="col-xl-10 m-2">
+        {% for ranking in rankings %}
+        <h4 class="m-4 text-justify">{{ ranking.name }}</h4>
+          <table class="m-2 table table-striped table-hover">
+              <thead>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">ELO</th>
+              </thead>
+              <tbody>
+                {% for entry in ranking.entries %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><a href="/elo/runner/{{ entry.runner.pk }}/">{{ entry.runner.fullname }}</a></td>
+                    <td>{{ entry.runner.elo }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+          </table>
+        {% endfor %}
+          <h3 class="m-4 text-center"><a href="https://helga-o.com/start/index.php?lauf={{ course.source_id }}">See on Helga</a></h3>
+        </div>
+      </div>
+  </main>
+
+  {% include "footer.html" %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  </body>
+</html>

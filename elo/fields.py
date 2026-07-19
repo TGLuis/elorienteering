@@ -5,6 +5,7 @@ class Source(models.IntegerChoices):
     HELGA_WEBRES = 1, "helga webres"
     LIVERESULT_SE = 2, "liveresults.se"
     FFCO_CN = 3, "ffco cn"
+    HELGA_START = 4, "helga start"
 
 class CourseType(models.IntegerChoices):
     UNKNOWN = 0, "unknown"

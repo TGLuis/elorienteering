@@ -54,6 +54,13 @@ class Ranking(models.Model):
         return f"{self.name} - {self.distance}m - {self.climb}m"
 
 
+class Entry(models.Model):
+    ranking = models.ForeignKey(Ranking, on_delete=models.CASCADE)
+    runner = models.ForeignKey(Runner, on_delete=models.CASCADE)
+    starttime = models.TimeField(null=True)
+    startnumber = models.PositiveIntegerField(default=0)
+
+
 class Result(models.Model):
     date = models.DateTimeField(db_index=True)
     ranking = models.ForeignKey(Ranking, on_delete=models.CASCADE)

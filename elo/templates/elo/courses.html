@@ -1,0 +1,66 @@
+<!doctype html>
+{% load static %}
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Show the future and last courses added in the platform.">
+    <title>ELOrienteering</title>
+    <link rel="icon" type="image/png" href="{% static 'favicon.png' %}" >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  </head>
+  <body>
+  {% include "header_search.html" %}
+
+  <main>
+  <h1 class="m-4 text-center">Courses</h1>
+  {% if future %}
+  <h4 class="m-4 text-center">Prediction of future courses</h4>
+      <div class="container" align="center">
+        <div class="col-xl-10 m-2">
+          <table class="m-2 table table-striped table-hover">
+              <thead>
+              <th scope="col">Date</th>
+              <th scope="col">Name</th>
+              <th scope="col">Place</th>
+              </thead>
+              <tbody>
+                {% for course in future %}
+                <tr>
+                    <td>{{ course.date|date:"d/m/Y" }}</td>
+                    <td><a href="/elo/future/{{ course.pk }}/">{{ course.name }}</a></td>
+                    <td>{{ course.location }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+          </table>
+        </div>
+      </div>
+  {% endif %}
+  <h4 class="m-4 text-center">Last courses added</h4>
+      <div class="container" align="center">
+        <div class="col-xl-10 m-2">
+          <table class="m-2 table table-striped table-hover">
+              <thead>
+              <th scope="col">Date</th>
+              <th scope="col">Name</th>
+              <th scope="col">Place</th>
+              </thead>
+              <tbody>
+                {% for course in past %}
+                <tr>
+                    <td>{{ course.date|date:"d/m/Y" }}</td>
+                    <td><a href="/elo/course/{{ course.pk }}/">{{ course.name }}</a></td>
+                    <td>{{ course.location }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+          </table>
+        </div>
+      </div>
+  </main>
+
+  {% include "footer.html" %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  </body>
+</html>

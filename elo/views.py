@@ -7,7 +7,8 @@ from django.core.paginator import Paginator
 
 from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache, get_all_clubs_from_cache
 from .utils import Navigation
-from .models import Runner, Result
+from .models import Runner, Result, Ranking, Course, Entry
+from .fields import CourseStatus
 
 
 def handle_filters(request):
@@ -83,6 +84,46 @@ def index(request):
 def compare(request):
     template = loader.get_template("elo/compare.html")
     return HttpResponse(template.render({}, request))
+
+
+def course(request, course_pk):
+    course = Course.objects.filter(pk=course_pk).first()
+    if not course:
+        raise Http404("Course does not exist")
+    db_rankings = Ranking.objects.filter(course=course)
+    rankings = []
+    for db_ranking in db_rankings:
+        ranking = {
+            "name": db_ranking.name,
+            "results": Result.objects.filter(ranking=db_ranking)
+        }
+        if len(ranking["results"]):
+            rankings.append(ranking)
+    template = loader.get_template("elo/course.html")
+    return HttpResponse(template.render({"course": course, "rankings": rankings}, request))
+
+
+def future(request, course_pk):
+    course = Course.objects.filter(pk=course_pk).first()
+    if not course:
+        raise Http404("Course does not exist")
+    db_rankings = Ranking.objects.filter(course=course).order_by("name")
+    rankings = []
+    for db_ranking in db_rankings:
+        ranking = {
+            "name": db_ranking.name,
+            "entries": Entry.objects.filter(ranking=db_ranking).order_by("-runner__elo")
+        }
+        if len(ranking["entries"]):
+            rankings.append(ranking)
+    template = loader.get_template("elo/future.html")
+    return HttpResponse(template.render({"course": course, "rankings": rankings}, request))
+
+def courses(request):
+    future = Course.objects.filter(status=CourseStatus.FUTURE).order_by("-date")
+    past = Course.objects.exclude(status=CourseStatus.FUTURE).order_by("-date")[:50]
+    template = loader.get_template("elo/courses.html")
+    return HttpResponse(template.render({"future": future, "past": past}, request))
 
 
 def ranking(request, ranking_id):

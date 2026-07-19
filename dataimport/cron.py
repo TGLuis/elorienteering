@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from dataimport.calculate import elo_for_courses as process_elo, rollback_to_date
 from dataimport.helga_webres import download_courses as helga_download_courses
 from dataimport.helga_webres import import_courses_in_db as helga_import_courses
+from dataimport.helga_start import main as helga_start_main
 from elo.models import Runner,Course
 from elo.fields import CourseStatus
 
@@ -51,6 +52,7 @@ def normal_run():
     reverse_courses_toimport()
     import_courses()
     process_elo()
+    helga_start_main()
 
 if __name__ == "__main__":
     rerun_all()
