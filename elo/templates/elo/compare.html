@@ -29,18 +29,19 @@
         <div class="col-xl-10 text-center m-2">
           <canvas id="myChart"></canvas>
           <button type="button" class="m-2 btn btn-primary" onclick="theChart.resetZoom()">Reset zoom</button>
+
+          <table class="m-2 table table-striped">
+            <thead>
+            <th scope="col">Name</th>
+            <th scope="col">ELO</th>
+            <th scope="col">Delete</th>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <table class="m-2 table table-striped">
-        <thead>
-        <th scope="col">Name</th>
-        <th scope="col">ELO</th>
-        <th scope="col">Delete</th>
-        </thead>
-        <tbody id="tableBody">
-        </tbody>
-      </table>
     </div>
   </main>
 

@@ -3,7 +3,7 @@ import os
 import logging
 import requests
 import xmltodict
-from elo.models import Runner
+from elo.models import Runner, Affiliation
 
 ov_url = "https://www.opunch.org/organization/OV/members?key={}"
 frso_url = "https://www.opunch.org/organization/FRSO/members?key={}"
@@ -15,20 +15,26 @@ def import_fede_members(fede_members, fede_name):
         name = f"{competitor['Person']['Name']['Given']} {competitor['Person']['Name']['Family']}"
         try:
             runner = Runner.objects.get(fullname=name)
-            runner.abso = competitor["Organisation"]["Id"]["@type"] == "ABSO"
-            runner.fede = fede_name
-            runner.club = competitor["Organisation"]["ShortName"]
             runner.nationality = competitor["Person"]["Nationality"]["@code"]
             runner.sex = competitor["Person"]["@sex"]
             runner.category = competitor["Class"]["Name"]
             runner.save()
+            affiliation = Affiliation.objects.get(country="BEL", runner=runner)
         except Runner.DoesNotExist:
             logger.info("Runner does not have any result yet")
+            continue
+        except Affiliation.DoesNotExist:
+            affiliation = Affiliation()
+            affiliation.country = "BEL"
+            affiliation.runner = runner
         except Exception as e:
             logger.error("Exception in get_runner_from_db")
             logger.error(e)
             logger.debug(name)
             exit()
+        affiliation.fede = fede_name
+        affiliation.club = competitor["Organisation"]["ShortName"]
+        affiliation.save()
 
 
 def import_be():

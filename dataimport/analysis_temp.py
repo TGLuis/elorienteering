@@ -20,8 +20,7 @@ def display_course_elo_change(helga_id):
         logger.info(ranking)
         results = Result.objects.filter(ranking=ranking).order_by("place")
         for result in results:
-            logger.info(result, end="\t")
-            logger.info(result.runner)
+            logger.info(f"{result} {result.runner}")
         logger.info("-"*12)
 
 def display_ncl_percentage_per_elo():
@@ -43,10 +42,10 @@ def display_ncl_percentage_per_runner(name):
     )
 
 def distribution_of_elo_update():
-    runner_with_more_than_30_results = Result.objects.filter(status="OK").values("runner__fullname", "runner__pk").annotate(count=Count("runner")).order_by("-count").filter(count__gte=31)
+    runner_with_more_than_30_results = Result.objects.filter(status="OK").values("source__runner__fullname", "source__runner__pk").annotate(count=Count("runner")).order_by("-count").filter(count__gte=31)
     results = []
     for runner in runner_with_more_than_30_results:
-        results.extend(list(Result.objects.filter(status="OK",runner__pk=runner['runner__pk']).exclude(place=0).exclude(elo_diff=0.00).order_by("date")[31:]))
+        results.extend(list(Result.objects.filter(status="OK",source__runner__pk=runner['source__runner__pk']).exclude(place=0).exclude(elo_diff=0.00).order_by("date")[31:]))
     elo_diff_array = np.array([float(res.elo_diff) for res in results])
     # Calculate basic statistics
     logger.info(f"Mean: {np.mean(elo_diff_array):.2f}")

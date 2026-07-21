@@ -48,12 +48,13 @@ def get_mean_elo_others(valid_results: Sequence[Result], the_result: Result, bef
             if current_place > len(valid_results):
                 break
         for valid_result in valid_results:
-            if valid_result.place == current_place and valid_result.runner.number_of_valid_courses > 3:
-                mean_list.append(float(valid_result.runner.elo))
+            if valid_result.place == current_place and valid_result.source.runner.number_of_valid_courses > 3:
+                mean_list.append(float(valid_result.source.runner.elo))
     if len(mean_list) < 2:
         return None
     mean_list.remove(max(mean_list))
     return rounded_mean(mean_list)
+
 
 def rounded_mean(the_list: Sequence[float]):
     return round(sum(the_list)/len(the_list), 2)
@@ -63,8 +64,8 @@ def evaluate_first_elo(valid_results: Sequence[Result], the_result: Result):
     elo_before = get_mean_elo_others(valid_results, the_result, True)
     elo_after= get_mean_elo_others(valid_results, the_result, False)
     if elo_before is None and elo_after is None:
-        return the_result.runner.elo
-    elo_mean = [] if the_result.runner.number_of_valid_courses == 0 else [float(the_result.runner.elo)]
+        return the_result.source.runner.elo
+    elo_mean = [] if the_result.source.runner.number_of_valid_courses == 0 else [float(the_result.source.runner.elo)]
     if elo_before is not None:
         elo_mean.append(max(min(elo_before, 2000), 1000))
     if elo_after is not None:
@@ -81,14 +82,14 @@ def get_real_opponents(number_of_previous_results, valid_results, cur_result):
     found_before = found_after = 0
     for i in [place for place in places if place < cur_result.place][::-1]:
         # skip if you have more than 10 results but your opponent has less
-        if number_of_previous_results < 11 or 11 < other_results[i].runner.number_of_valid_courses:
+        if number_of_previous_results < 11 or 11 < other_results[i].source.runner.number_of_valid_courses:
             found_before += 1
             real_opponents.append(other_results[i])
             if found_before == 10:
                 break
     for i in [place for place in places if place > cur_result.place]:
         # skip if you have more than 10 results but your opponent has less
-        if number_of_previous_results < 11 or 11 < other_results[i].runner.number_of_valid_courses:
+        if number_of_previous_results < 11 or 11 < other_results[i].source.runner.number_of_valid_courses:
             found_after += 1
             real_opponents.append(other_results[i])
             if found_after == 10:
@@ -111,7 +112,7 @@ def compute_elo_diff(ranking: Ranking):
 
 
     for cur_result in valid_results:
-        number_of_previous_results = cur_result.runner.number_of_valid_courses
+        number_of_previous_results = cur_result.source.runner.number_of_valid_courses
         if number_of_previous_results < 3:
             first_three_results(cur_result, valid_results)
             continue
@@ -135,34 +136,35 @@ def reverse_elo_diff(ranking: Ranking):
 
     for result in results:
         if result.status in ["NCL", "DSQ"]:
-            result.runner.elo = round(result.runner.elo - round(result.elo_diff, 2), 2)
-            result.runner.save()
+            result.source.runner.elo = round(result.source.runner.elo - round(result.elo_diff, 2), 2)
+            result.source.runner.save()
 
     valid_results = [result for result in results if result.place != 0]
     if len(valid_results) in [0, 1]:
         return
 
     for result in valid_results:
-        runner = result.runner
+        runner = result.source.runner
         runner.elo = round(result.new_elo - round(result.elo_diff, 2),2)
         runner.number_of_valid_courses -= 1
         runner.save()
 
 
 def save_elo_change(cur_result, elo_change):
-    if cur_result.runner.elo < 600 and elo_change < 0:
+    if cur_result.source.runner.elo < 600 and elo_change < 0:
         elo_change /= 2
     cur_result.elo_diff = round(elo_change, 2)
-    cur_result.new_elo = round(float(cur_result.runner.elo) + elo_change, 2)
+    cur_result.new_elo = round(float(cur_result.source.runner.elo) + elo_change, 2)
     cur_result.save()
 
 
 def save_all_runners(valid_results):
     for result in valid_results:
-        result.runner.elo = result.new_elo
-        result.runner.number_of_valid_courses += 1
-        result.runner.active = True
-        result.runner.save()
+        runner = result.source.runner
+        runner.elo = result.new_elo
+        runner.number_of_valid_courses += 1
+        runner.active = True
+        runner.save()
 
 
 def get_elo_change(cur_result, k_base, other_results):
@@ -172,7 +174,7 @@ def get_elo_change(cur_result, k_base, other_results):
         real_n += 1
         S = get_S(cur_result, other_result)
         # work out EA
-        EA = 1 / (1.0 + 10.0 ** ((float(other_result.runner.elo) - float(cur_result.runner.elo)) / 400.0))
+        EA = 1 / (1.0 + 10.0 ** ((float(other_result.source.runner.elo) - float(cur_result.source.runner.elo)) / 400.0))
         # calculate ELO change vs this one opponent, add it to our change bucket
         elo_change += S - EA
     if real_n > 0:
@@ -183,16 +185,16 @@ def get_elo_change(cur_result, k_base, other_results):
 def first_three_results(cur_result, valid_results):
     new_elo = evaluate_first_elo(valid_results, cur_result)
     cur_result.new_elo = new_elo
-    cur_result.elo_diff = round(float(new_elo) - float(cur_result.runner.elo), 2)
+    cur_result.elo_diff = round(float(new_elo) - float(cur_result.source.runner.elo), 2)
     cur_result.save()
 
 
 def only_one_runner(result):
-    result.new_elo = result.runner.elo
+    result.new_elo = result.source.runner.elo
     result.elo_diff = 0
-    result.runner.active = True
+    result.source.runner.active = True
     result.save()
-    result.runner.save()
+    result.source.runner.save()
 
 
 def get_S(cur_result: Result, other_result: Result) -> float:
@@ -207,20 +209,20 @@ def get_S(cur_result: Result, other_result: Result) -> float:
 def handle_result_not_OK(results: QuerySet[Result, Result]):
     for result in results:
         if result.status == "NCL":
-            result.elo_diff = -round(float(result.runner.elo)*0.005, 2)
-            result.new_elo = round(float(result.runner.elo) + float(result.elo_diff), 2)
+            result.elo_diff = -round(float(result.source.runner.elo)*0.005, 2)
+            result.new_elo = round(float(result.source.runner.elo) + float(result.elo_diff), 2)
             result.runner.elo = result.new_elo
         elif result.status == "DSQ":
-            result.elo_diff = -round(float(result.runner.elo)*0.010, 2)
-            result.new_elo = round(float(result.runner.elo) + float(result.elo_diff), 2)
+            result.elo_diff = -round(float(result.source.runner.elo)*0.010, 2)
+            result.new_elo = round(float(result.source.runner.elo) + float(result.elo_diff), 2)
             result.runner.elo = result.new_elo
         elif result.place == 0:
             result.new_elo = result.runner.elo
             result.elo_diff = 0
 
-        result.runner.active = True
+        result.source.runner.active = True
         result.save()
-        result.runner.save()
+        result.source.runner.save()
 
 
 def set_runner_inactive(last_year):
@@ -252,7 +254,7 @@ def elo_for_courses():
             set_runner_inactive(year)
             update_elo_runners_inactives()
             year = course_year
-        logger.debug(f"{course.source_id}", end=", ", flush=True)
+        logger.debug(f"{course.source_id}")
         rankings = Ranking.objects.filter(course=course)
         for ranking in rankings:
             compute_elo_diff(ranking)
@@ -270,7 +272,7 @@ def rollback_to_date(date: datetime):
             set_runner_inactive(year-1)
             reverse_update_elo_runners_inactives()
             year = course_year
-        logger.debug(f"{course.source_id}", end=", ", flush=True)
+        logger.debug(f"{course.source_id}")
         rankings = Ranking.objects.filter(course=course)
         for ranking in rankings:
             reverse_elo_diff(ranking)
