@@ -1,7 +1,7 @@
 from django.db import models
 from django_enum import EnumField
 from elo.utils import get_flag_from_nationality
-from elo.fields import Source, CourseType, CourseSubType, CourseStatus
+from elo.fields import SourceType, CourseType, CourseSubType, CourseStatus
 
 class PageView(models.Model):
     path = models.CharField(max_length=255, unique=True)
@@ -37,7 +37,7 @@ class Course(models.Model):
     source_id = models.IntegerField(default=0)
     location = models.CharField()
     status = EnumField(CourseStatus, default=CourseStatus.UNKNOWN)
-    source = EnumField(Source, default=Source.UNKNOWN)
+    source = EnumField(SourceType, default=SourceType.UNKNOWN)
     type = EnumField(CourseType, default=CourseType.UNKNOWN)
     subtype = EnumField(CourseSubType, default=CourseSubType.UNKNOWN)
 
@@ -68,7 +68,7 @@ class Entry(models.Model):
 class Result(models.Model):
     date = models.DateTimeField(db_index=True)
     ranking = models.ForeignKey(Ranking, on_delete=models.CASCADE)
-    runner = models.ForeignKey(Runner, on_delete=models.CASCADE)
+    runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING)
     place = models.IntegerField()
     time = models.TimeField(null=True)
     status = models.CharField()
@@ -78,3 +78,18 @@ class Result(models.Model):
 
     def __str__(self):
         return f"{self.place} - {self.time} - {self.status} - {self.elo_diff} - {self.new_elo}"
+
+
+class Affiliation(models.Model):
+    fede = models.CharField()
+    club = models.CharField(db_index=True)
+    country = models.CharField(db_index=True, null=True)
+    runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING, null=True)
+
+    def __str__(self):
+        return f"{self.fede} - {self.club} - {self.country} - {self.runner}"
+
+class Source(models.Model):
+    source_type = EnumField(SourceType, default=SourceType.UNKNOWN)
+    ext_runner_id = models.IntegerField(db_index=True)
+    runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING, null=True)
