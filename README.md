@@ -53,6 +53,23 @@ This project aims to do a classification based of elo calculations of the helga 
 
 Python 3.10 minimum (to use the same Django version) ! I use python 3.14. Please do a PR if you want to add something or open an issue if you just have some suggestion.
 
+### Launch the project
+
+Create a virtual environment with your ide or python command and install the packages in requirements.txt.
+
+```commandline
+# In a linux env
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+Then create the db in the project:
+
+```commandline
+python manage.py migrate
+```
+
 ## some notes
 
 
