@@ -5,7 +5,7 @@ from datetime import datetime
 
 import requests
 
-from elo.fields import Source, CourseStatus, CourseType, CourseSubType
+from elo.fields import SourceType, CourseStatus, CourseType, CourseSubType
 from elo.models import Course, Ranking, Runner, Entry
 
 
@@ -31,7 +31,7 @@ def get_courses_id():
 
 
 def remove_courses():
-    db_courses = Course.objects.filter(source=Source.HELGA_START)
+    db_courses = Course.objects.filter(source=SourceType.HELGA_START)
     if db_courses is not None:
         db_courses.delete()
 
@@ -67,7 +67,7 @@ def import_course_in_db(course_id):
     course.status = CourseStatus.FUTURE
     course.type = CourseType.UNKNOWN # TODO add some logic here ?
     course.subtype = CourseSubType.UNKNOWN # TODO add some logic here ?
-    course.source = Source.HELGA_START
+    course.source = SourceType.HELGA_START
     course.save()
 
     entries = []

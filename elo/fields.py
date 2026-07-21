@@ -1,6 +1,6 @@
 from django.db import models
 
-class Source(models.IntegerChoices):
+class SourceType(models.IntegerChoices):
     UNKNOWN = 0, "unknown"
     HELGA_WEBRES = 1, "helga webres"
     LIVERESULT_SE = 2, "liveresults.se"

@@ -21,7 +21,7 @@ countries = ["BEL", "NED", "FRA", "LUX", "GER", "SWE"]
 
 def download_courses():
     url = "https://helga-o.com/webres-api/ws-complist.php?top=100"
-    courses_to_download = Course.objects.filter(source=Source.HELGA_WEBRES,status=CourseStatus.TODOWNLOAD)
+    courses_to_download = Course.objects.filter(source=SourceType.HELGA_WEBRES, status=CourseStatus.TODOWNLOAD)
     courses_to_download_ids = [str(c.source_id) for c in courses_to_download]
     logger.debug(f"{courses_to_download_ids=}")
     response = requests.get(url)
@@ -204,7 +204,7 @@ def import_courses_in_db():
             course.status = CourseStatus.TOPROCESS
             course.type = CourseType.UNKNOWN # TODO add some logic here ?
             course.subtype = CourseSubType.UNKNOWN # TODO add some logic here ?
-            course.source = Source.HELGA_WEBRES
+            course.source = SourceType.HELGA_WEBRES
             course.save()
 
             results = []
