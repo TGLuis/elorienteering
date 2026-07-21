@@ -61,10 +61,17 @@ class Entry(models.Model):
     startnumber = models.PositiveIntegerField(default=0)
 
 
+class Source(models.Model):
+    source_type = EnumField(SourceType, default=SourceType.UNKNOWN)
+    ext_runner_id = models.IntegerField(db_index=True)
+    runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING, null=True)
+
+
 class Result(models.Model):
     date = models.DateTimeField(db_index=True)
     ranking = models.ForeignKey(Ranking, on_delete=models.CASCADE)
-    runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING)
+    runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING) # to remove
+    source = models.ForeignKey(Source, on_delete=models.DO_NOTHING, null=True) # remove null = true AFTER migration
     place = models.IntegerField()
     time = models.TimeField(null=True)
     status = models.CharField()
@@ -84,8 +91,3 @@ class Affiliation(models.Model):
 
     def __str__(self):
         return f"{self.fede} - {self.club} - {self.country} - {self.runner}"
-
-class Source(models.Model):
-    source_type = EnumField(SourceType, default=SourceType.UNKNOWN)
-    ext_runner_id = models.IntegerField(db_index=True)
-    runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING, null=True)
