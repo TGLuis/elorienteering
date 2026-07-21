@@ -9,4 +9,7 @@ SELECT elo_runner.HELGA_ID, 1, elo_runner.id FROM elo_runner WHERE helga_id is n
 
 INSERT INTO elo_affiliation (fede, club, country, runner_id)
 SELECT elo_runner.fede, elo_runner.club, 'BEL', elo_runner.id FROM elo_runner WHERE abso = 1;
+
+UPDATE elo_result  SET source_id = elo_source.id FROM elo_source
+    WHERE elo_result.runner_id = elo_source.runner_id;
 ````
