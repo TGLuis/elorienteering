@@ -30,3 +30,4 @@ class CourseStatus(models.IntegerChoices):
     TOPROCESS = 3, "to process"
     FUTURE = 9, "future course" # Only there for prediction of a course
     DONE = 10, "done"
+    TODELETE = 20, "to delete"

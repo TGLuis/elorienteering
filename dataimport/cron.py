@@ -20,6 +20,15 @@ def import_courses():
     logger.info("import courses")
     helga_import_courses()
 
+def remove_courses_todelete():
+    print("delete courses if necessary")
+    oldest_todelete_course = Course.objects.filter(status=CourseStatus.TODELETE).order_by("date").first()
+    if oldest_todelete_course is not None:
+        the_date = oldest_todelete_course.date.isoformat(sep=" ", timespec="seconds")
+        last_courses = Course.objects.filter(date__gte=the_date).exclude(status=CourseStatus.TODELETE)
+        last_courses.update(status=CourseStatus.TOIMPORT)
+    # TODO remove files of TODELETE courses
+
 
 
 def rerun_all():
@@ -41,7 +50,7 @@ def reverse_courses_toimport():
     oldest_toimport_course = Course.objects.filter(status=CourseStatus.TOIMPORT).order_by("date").first()
     if oldest_toimport_course is not None:
         the_date = oldest_toimport_course.date.isoformat(sep=" ", timespec="seconds")
-        last_courses = Course.objects.filter(date__gte=the_date)
+        last_courses = Course.objects.filter(date__gte=the_date).exclude(status=CourseStatus.TODELETE)
         last_courses.update(status=CourseStatus.TOIMPORT)
         rollback_to_date(oldest_toimport_course.date)
 
@@ -49,6 +58,7 @@ def reverse_courses_toimport():
 def normal_run():
     last_two_weeks_to_download()
     download_courses()
+    remove_courses_todelete()
     reverse_courses_toimport()
     import_courses()
     process_elo()

@@ -5,3 +5,4 @@ gunicorn
 django-crontab
 xmltodict
 django-enum
+pytest

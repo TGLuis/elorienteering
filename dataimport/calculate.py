@@ -274,4 +274,6 @@ def rollback_to_date(date: datetime):
         rankings = Ranking.objects.filter(course=course)
         for ranking in rankings:
             reverse_elo_diff(ranking)
+        if course.status == CourseStatus.TODELETE:
+            course.delete()
 
