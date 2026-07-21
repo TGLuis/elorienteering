@@ -12,13 +12,13 @@ class PageView(models.Model):
 
 class Runner(models.Model):
     fullname = models.CharField(db_index=True)
-    helga_id = models.IntegerField(null=True, db_index=True)
+    helga_id = models.IntegerField(null=True, db_index=True) # REMOVED
     elo = models.DecimalField(default=1600.0, max_digits=7, decimal_places=2, db_index=True)
     number_of_valid_courses = models.PositiveIntegerField(default=0, db_index=True)
     sex = models.CharField(default="", max_length=1) # TODO replace with enum
-    abso = models.BooleanField(default=False, db_index=True)
-    fede = models.CharField(default="")
-    club = models.CharField(default="")
+    abso = models.BooleanField(default=False, db_index=True) # REMOVED
+    fede = models.CharField(default="") # REMOVED
+    club = models.CharField(default="") # REMOVED
     nationality = models.CharField(default="")
     category = models.CharField(default="", max_length=5, db_index=True) # TODO replace with only age ?
     active = models.BooleanField(default=True, db_index=True)

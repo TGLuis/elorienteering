@@ -137,7 +137,7 @@ def ranking(request, ranking_id):
 def detail(request, runner_id):
     runner = get_object_or_404(Runner, pk=runner_id)
     template = loader.get_template("elo/runner.html")
-    results = Result.objects.filter(runner=runner).order_by("-date")
+    results = Result.objects.filter(source__runner=runner).order_by("-date")
     total_delta = [datetime.timedelta(hours=result.time.hour,minutes=result.time.minute,seconds=result.time.second).total_seconds() for result in results if result.time is not None]
     context = {
         "runner": runner,
@@ -161,7 +161,7 @@ def restless(request):
     page_number = int(request.GET.get("page", "1"))
     nav = Navigation(pages, page_number)
     current_page = pages.page(page_number)
-    the_runners = [{"name": runner["runner__fullname"], "pk": runner["runner__pk"], "count": runner["count"], "place": x}
+    the_runners = [{"name": runner["source__runner__fullname"], "pk": runner["source__runner__pk"], "count": runner["count"], "place": x}
     for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
     context = {"runners" : the_runners, "nav": nav, "base": f"restless/", "years": years[::-1], "active_year":active_year, "other_params":f"&year={active_year}"}
     return HttpResponse(template.render(context, request))

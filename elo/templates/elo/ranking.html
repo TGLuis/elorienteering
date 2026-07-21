@@ -29,7 +29,7 @@
                 {% for result in results %}
                 <tr>
                     <td>{{ result.place }}</td>
-                    <td><a href="/elo/runner/{{ result.runner.pk }}/">{{ result.runner.fullname }}</a></td>
+                    <td><a href="/elo/runner/{{ result.source.runner.pk }}/">{{ result.source.runner.fullname }}</a></td>
                     <td>{{ result.status }}</td>
                       {% if result.elo_diff == 0 %}
                         <td class="text-warning">{{ result.elo_diff }}</td>

@@ -8,7 +8,7 @@ def get_restless_from_cache(active_year):
     if active_year == "year":
         return cache.get_or_set(
             "restless_year",
-            (Result.objects.filter(status="OK").values("runner__fullname", "runner__pk")
+            (Result.objects.filter(status="OK").values("source__runner__fullname", "source__runner__pk")
              .annotate(count=Count("runner")).filter(count__gte=3).order_by("-count")),
             timeout=14400  # 4 hours
         )
@@ -16,7 +16,7 @@ def get_restless_from_cache(active_year):
         f"restless_year-{active_year}",
         (Result.objects.filter(status="OK", date__gte=f"{active_year}-01-01 00:00+01:00",
                                date__lt=f"{int(active_year) + 1}-01-01 00:00+01:00")
-         .values("runner__fullname", "runner__pk")
+         .values("source__runner__fullname", "source__runner__pk")
          .annotate(count=Count("runner")).filter(count__gte=3).order_by("-count")),
         timeout=14400  # 4 hours
     )

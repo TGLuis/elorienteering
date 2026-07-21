@@ -12,8 +12,8 @@ import urllib.parse
 from datetime import datetime, time
 
 from dataimport.calculate import DIR_PATH
-from elo.models import Course, Runner, Ranking, Result
-from elo.fields import *
+from elo.models import Course, Runner, Ranking, Result, Source
+from elo.fields import SourceType, CourseType, CourseStatus, CourseSubType
 
 logger = logging.getLogger(__name__)
 DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
@@ -169,10 +169,24 @@ def iterate_over_all_course_files():
 
 def get_runner_from_db(runner_name):
     try:
-        return Runner.objects.get(fullname = runner_name)
+        runner = Runner.objects.get(fullname = runner_name)
+        sources = Source.objects.filter(source_type=SourceType.HELGA_WEBRES, runner=runner)
+        if sources.count() == 0:
+            source = Source(source_type=SourceType.HELGA_WEBRES, ext_runner_id=get_helga_id(runner_name), runner=runner)
+            source.save()
+        elif sources.count() == 1:
+            source = Source.objects.get(source_type=SourceType.HELGA_WEBRES, runner=runner)
+        else:
+            logger.error("Error in get_runner_from_db")
+            logger.error(f"{runner_name} has multiple sources with Helga webres.")
+            logger.debug(f"{runner_name} has sources with Helga webres: {sources}")
+            exit()
+        return runner, source
     except Runner.DoesNotExist:
-        runner = Runner(fullname=runner_name, helga_id=get_helga_id(runner_name))
+        runner = Runner(fullname=runner_name)
         runner.save()
+        source = Source(source_type=SourceType.HELGA_WEBRES, ext_runner_id=get_helga_id(runner_name), runner=runner)
+        source.save()
         return runner
     except Exception as e:
         if "get() returned more than one Runner" in str(e):
@@ -194,7 +208,7 @@ def import_courses_in_db():
                     continue
                 else:
                     db_course.delete()
-            logger.info(course_id, end=", ", flush=True)
+            logger.info(course_id)
             course_json = json.load(f)
             course = Course()
             course.source_id = course_id
@@ -221,7 +235,8 @@ def import_courses_in_db():
                         continue
                     result = Result()
                     result.ranking = ranking
-                    result.runner = get_runner_from_db(result_json["name"])
+                    runner, source = get_runner_from_db(result_json["name"])
+                    result.source = source
                     result.place = result_json["position"]
                     try:
                         result.time = time.fromisoformat(result_json["time"])
