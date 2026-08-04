@@ -1,4 +1,5 @@
 from django.core.paginator import Paginator
+from pycountry import countries
 
 class Navigation:
     def __init__(self, pages: Paginator, page_number: int):
@@ -37,3 +38,12 @@ class Navigation:
 
     def next2_page_number(self):
         return self.current_page_number + 2
+
+
+def get_flag_from_nationality(nationality:str ) -> dict :
+    if nationality is None:
+        return {}
+    country = countries.get(alpha_3=nationality)
+    if country is not None:
+        return {'emoji': country.flag, 'aria_label': nationality}
+    return {'emoji': '🌍', 'aria_label':'No nationality given'}

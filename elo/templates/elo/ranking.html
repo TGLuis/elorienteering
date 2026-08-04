@@ -21,7 +21,7 @@
               <thead>
               <th scope="col">#</th>
               <th scope="col">Name</th>
-              <th scope="col">status</th>
+              <th scope="col">Status</th>
               <th scope="col">ELO update</th>
               <th scope="col">New ELO</th>
               </thead>
@@ -29,7 +29,7 @@
                 {% for result in results %}
                 <tr>
                     <td>{{ result.place }}</td>
-                    <td><a href="/elo/runner/{{ result.runner.pk }}/">{{ result.runner.fullname }}</a></td>
+                    <td><span role="img" aria-label="{{ result.runner.flag_emoji.aria_label }}">{{ result.runner.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a href="/elo/runner/{{ result.runner.pk }}/">{{ result.runner.fullname }}</a></td>
                     <td>{{ result.status }}</td>
                       {% if result.elo_diff == 0 %}
                         <td class="text-warning">{{ result.elo_diff }}</td>
