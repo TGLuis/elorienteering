@@ -64,7 +64,7 @@
                 {% for runner in runners %}
                 <tr>
                     <td>{{ runner.place }}</td>
-                    <td><a href="/elo/runner/{{ runner.properties.pk }}/">{{ runner.properties.fullname }}</a></td>
+                    <td><span role="img" aria-label="{{ runner.properties.flag_emoji.aria_label }}">{{ runner.properties.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a href="/elo/runner/{{ runner.properties.pk }}/">{{ runner.properties.fullname }}</a></td>
                     <td>{{ runner.properties.elo }}</td>
                 </tr>
                 {% endfor %}
