@@ -30,7 +30,11 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td><a href="/elo/runner/{{ entry.runner.pk }}/">{{ entry.runner.fullname }}</a></td>
+                    {% if entry.runner.number_of_valid_courses < 3 %}
+                    <td>?</td>
+                    {% else %}
                     <td>{{ entry.runner.elo }}</td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
               </tbody>
