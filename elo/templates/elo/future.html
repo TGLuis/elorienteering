@@ -28,8 +28,14 @@
               <tbody>
                 {% for entry in ranking.entries %}
                 <tr>
+                    {% if entry.runner.number_of_valid_courses < 3 %}
+                    <td></td>
+                    {% else %}
                     <td>{{ forloop.counter }}</td>
+                    {% endif %}
+
                     <td><a href="/elo/runner/{{ entry.runner.pk }}/">{{ entry.runner.fullname }}</a></td>
+
                     {% if entry.runner.number_of_valid_courses < 3 %}
                     <td>?</td>
                     {% else %}

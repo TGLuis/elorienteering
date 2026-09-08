@@ -28,7 +28,11 @@
               <tbody>
                 {% for result in results %}
                 <tr>
+                    {% if result.place != 0 %}
                     <td>{{ result.place }}</td>
+                    {% else %}
+                    <td></td>
+                    {% endif %}
                     <td><a href="/elo/runner/{{ result.runner.pk }}/">{{ result.runner.fullname }}</a></td>
                     <td>{{ result.status }}</td>
                       {% if result.elo_diff == 0 %}
