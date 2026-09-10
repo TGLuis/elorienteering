@@ -1,5 +1,6 @@
 from django.db import models
 from django_enum import EnumField
+from elo.utils import get_flag_from_nationality
 from elo.fields import Source, CourseType, CourseSubType, CourseStatus
 
 class PageView(models.Model):
@@ -22,6 +23,9 @@ class Runner(models.Model):
     nationality = models.CharField(default="")
     category = models.CharField(default="", max_length=5, db_index=True) # TODO replace with only age ?
     active = models.BooleanField(default=True, db_index=True)
+
+    def flag_emoji(self):
+        return get_flag_from_nationality(self.nationality)
 
     def __str__(self):
         return f"Name={self.fullname}\telo={self.elo}\thelga_id={self.helga_id}\tvalid-results={self.number_of_valid_courses}"

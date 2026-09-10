@@ -28,7 +28,7 @@ This project aims to do a classification based of elo calculations of the helga 
 ### Long term
 
 - [x] Graph with dynamic add/remove of runners to compare evolution.
-- [ ] prediction of a course based on helga-start.
+- [x] prediction of a course based on helga-start.
 - [x] ranking only of abso/bvos licensed runners. 
 - [ ] dashboard for a runner with stats
   - General
@@ -44,7 +44,7 @@ This project aims to do a classification based of elo calculations of the helga 
   - if BE
     - [ ] rank in BE
     - [ ] ?
-  - [ ] Separate elo details to another page for efficiency time?
+  - [ ] Separate elo details to another page for efficiency time? not necessary right now
 - [x] Get a graph with distribution of elo (for runner with more than 3 results)
 - [x] merging D & H of a same circuit to have a better comparison between women and men elo.
 - [ ] Translation in french + dutch
