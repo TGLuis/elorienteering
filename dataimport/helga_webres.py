@@ -148,6 +148,8 @@ def pre_process(helga_id, course_file):
     with open(course_file) as f:
         course_json = json.load(f)
     categories = course_json["categories"]
+    if all([category["distance"] == 0 and category["climb"] == 0 and not is_relay(category) for category in categories.values()]):
+        return  # bypass course aux score, ask to have score ?
     if all([re.findall(r"[HD]:.*", category_name) for category_name in categories.keys()]):
         logger.info(f"Merging HD for course: {helga_id} - {course_json['name']}")
         course_json["categories"] = merge_DH(categories)

@@ -28,9 +28,19 @@
               <tbody>
                 {% for entry in ranking.entries %}
                 <tr>
+                    {% if entry.runner.number_of_valid_courses < 3 %}
+                    <td></td>
+                    {% else %}
                     <td>{{ forloop.counter }}</td>
-                    <td><a href="/elo/runner/{{ entry.runner.pk }}/">{{ entry.runner.fullname }}</a></td>
+                    {% endif %}
+
+                    <td><span role="img" aria-label="{{ entry.runner.flag_emoji.aria_label }}">{{ entry.runner.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a href="/elo/runner/{{ entry.runner.pk }}/">{{ entry.runner.fullname }}</a></td>
+
+                    {% if entry.runner.number_of_valid_courses < 3 %}
+                    <td>?</td>
+                    {% else %}
                     <td>{{ entry.runner.elo }}</td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
               </tbody>

@@ -29,8 +29,6 @@ def remove_courses_todelete():
         last_courses.update(status=CourseStatus.TOIMPORT)
     # TODO remove files of TODELETE courses
 
-
-
 def rerun_all():
     download_courses()
     import_courses()

@@ -1,4 +1,5 @@
 import datetime
+from itertools import chain
 
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404
@@ -93,9 +94,14 @@ def course(request, course_pk):
     db_rankings = Ranking.objects.filter(course=course)
     rankings = []
     for db_ranking in db_rankings:
+        results = Result.objects.filter(ranking=db_ranking)
+        ordered = list(chain(results.filter(status="OK").exclude(place=0).order_by("place"),
+                        results.filter(place=0,status="OK").order_by("-new_elo"),
+                        results.exclude(status="OK").order_by("-status", "-new_elo"))
+                       )
         ranking = {
             "name": db_ranking.name,
-            "results": Result.objects.filter(ranking=db_ranking)
+            "results": ordered
         }
         if len(ranking["results"]):
             rankings.append(ranking)
@@ -110,9 +116,13 @@ def future(request, course_pk):
     db_rankings = Ranking.objects.filter(course=course).order_by("name")
     rankings = []
     for db_ranking in db_rankings:
+        entries = Entry.objects.filter(ranking=db_ranking)
         ranking = {
             "name": db_ranking.name,
-            "entries": Entry.objects.filter(ranking=db_ranking).order_by("-runner__elo")
+            "entries": list(chain(
+                entries.exclude(runner__number_of_valid_courses__lt=3).order_by("-runner__elo"),
+                entries.filter(runner__number_of_valid_courses__lt=3).order_by("-runner__fullname")
+            ))
         }
         if len(ranking["entries"]):
             rankings.append(ranking)
@@ -128,10 +138,11 @@ def courses(request):
 
 def ranking(request, ranking_id):
     results = Result.objects.filter(ranking__pk=ranking_id)
+    ordered = chain(results.filter(status="OK").order_by("place"), results.exclude(status="OK").order_by("-status", "-new_elo"))
     if not results:
         raise Http404("Ranking does not exist")
     template = loader.get_template("elo/ranking.html")
-    return HttpResponse(template.render({"results": results, "ranking": results.first().ranking}, request))
+    return HttpResponse(template.render({"results": ordered, "ranking": results.first().ranking}, request))
 
 
 def detail(request, runner_id):
