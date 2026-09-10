@@ -6,3 +6,4 @@ django-crontab
 xmltodict
 django-enum
 pytest
+pycountry

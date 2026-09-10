@@ -91,7 +91,7 @@ def course(request, course_pk):
     course = Course.objects.filter(pk=course_pk).first()
     if not course:
         raise Http404("Course does not exist")
-    db_rankings = Ranking.objects.filter(course=course)
+    db_rankings = Ranking.objects.filter(course=course).order_by("name")
     rankings = []
     for db_ranking in db_rankings:
         results = Result.objects.filter(ranking=db_ranking)

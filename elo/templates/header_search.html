@@ -1,5 +1,5 @@
+{% load static %}
 <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-    {% load static %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a href="/elo/" class="navbar-brand">
@@ -9,21 +9,6 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#myNavbar1" aria-controls="myNavbar1" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <style>
-                .flag {
-                  width: 30px;
-                  height: 20px;
-                }
-                .belgium {
-                  background: linear-gradient(
-                    to right,
-                    black 33%,
-                    #fddb21 33%,
-                    #fddb21 67%,
-                    #ef303f 0
-                  );
-                }
-            </style>
             <div class="collapse navbar-collapse" id="myNavbar1">
                 <ul class="navbar-nav">
                     <li class="nav-item"><a href="/elo/courses/" class="nav-link">Courses</a></li>
@@ -99,4 +84,13 @@
         }
     });
 </script>
+<style>
+    @font-face {
+      font-family: Twemoji;
+      src: url("{% static 'fonts/twemoji.ttf' %}");
+    }
 
+    .emoji {
+      font-family: Twemoji;
+    }
+</style>

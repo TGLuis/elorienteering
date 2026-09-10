@@ -34,7 +34,7 @@
                     <td>{{ forloop.counter }}</td>
                     {% endif %}
 
-                    <td><span role="img" aria-label="{{ entry.runner.flag_emoji.aria_label }}">{{ entry.runner.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a href="/elo/runner/{{ entry.runner.pk }}/">{{ entry.runner.fullname }}</a></td>
+                    <td><span class="emoji" aria-label="{{ entry.properties.flag_emoji.aria_label }}">{{ entry.properties.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a href="/elo/runner/{{ entry.properties.pk }}/">{{ entry.properties.fullname }}</a></td>
 
                     {% if entry.runner.number_of_valid_courses < 3 %}
                     <td>?</td>
