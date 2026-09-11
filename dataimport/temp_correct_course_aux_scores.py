@@ -16,9 +16,10 @@ def main():
                 categories = course_json["categories"]
                 if all([not is_relay(category) for category in categories.values()]):
                     print(f"{Course.objects.get(source_id=course)} {Course.objects.get(source_id=course).source_id}")
-                    c = Course.objects.get(pk=course)
+                    c = Course.objects.get(source_id=course)
                     c.status = CourseStatus.TODOWNLOAD
                     c.save()
                     os.remove(f"dataimport/data/courses/helga/{course}.json")
-            except:
+            except Exception as e:
+                print(f"{e}")
                 print(f"Couldn't load course with helga id {course}")
