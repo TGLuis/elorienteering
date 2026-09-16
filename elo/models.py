@@ -69,6 +69,7 @@ class Source(models.Model):
     source_type = EnumField(SourceType, default=SourceType.UNKNOWN)
     ext_runner_id = models.IntegerField(db_index=True)
     runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING, null=True)
+    fullname_in_source = models.CharField(db_index=True, null=True)
 
 
 class Result(models.Model):

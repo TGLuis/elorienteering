@@ -172,12 +172,12 @@ def iterate_over_all_course_files():
 def get_runner_from_db(runner_name):
     try:
         runner = Runner.objects.get(fullname = runner_name)
-        sources = Source.objects.filter(source_type=SourceType.HELGA_WEBRES, runner=runner)
+        sources = Source.objects.filter(source_type=SourceType.HELGA_WEBRES, fullname_in_source=runner_name)
         if sources.count() == 0:
-            source = Source(source_type=SourceType.HELGA_WEBRES, ext_runner_id=get_helga_id(runner_name), runner=runner)
+            source = Source(source_type=SourceType.HELGA_WEBRES, ext_runner_id=get_helga_id(runner_name), runner=runner, fullname_in_source=runner_name)
             source.save()
         elif sources.count() == 1:
-            source = Source.objects.get(source_type=SourceType.HELGA_WEBRES, runner=runner)
+            source = Source.objects.get(source_type=SourceType.HELGA_WEBRES, fullname_in_source=runner_name)
         else:
             logger.error("Error in get_runner_from_db")
             logger.error(f"{runner_name} has multiple sources with Helga webres.")
@@ -187,7 +187,7 @@ def get_runner_from_db(runner_name):
     except Runner.DoesNotExist:
         runner = Runner(fullname=runner_name)
         runner.save()
-        source = Source(source_type=SourceType.HELGA_WEBRES, ext_runner_id=get_helga_id(runner_name), runner=runner)
+        source = Source(source_type=SourceType.HELGA_WEBRES, ext_runner_id=get_helga_id(runner_name), runner=runner, fullname_in_source=runner_name)
         source.save()
         return runner
     except Exception as e:
