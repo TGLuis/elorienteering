@@ -20,7 +20,7 @@ def display_course_elo_change(helga_id):
         logger.info(ranking)
         results = Result.objects.filter(ranking=ranking).order_by("place")
         for result in results:
-            logger.info(f"{result} {result.runner}")
+            logger.info(f"{result} {result.source.runner}")
         logger.info("-"*12)
 
 def display_ncl_percentage_per_elo():

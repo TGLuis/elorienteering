@@ -62,7 +62,7 @@ def rounded_mean(the_list: Sequence[float]):
 
 def evaluate_first_elo(valid_results: Sequence[Result], the_result: Result):
     elo_before = get_mean_elo_others(valid_results, the_result, True)
-    elo_after= get_mean_elo_others(valid_results, the_result, False)
+    elo_after = get_mean_elo_others(valid_results, the_result, False)
     if elo_before is None and elo_after is None:
         return the_result.source.runner.elo
     elo_mean = [] if the_result.source.runner.number_of_valid_courses == 0 else [float(the_result.source.runner.elo)]
@@ -211,13 +211,13 @@ def handle_result_not_OK(results: QuerySet[Result, Result]):
         if result.status == "NCL":
             result.elo_diff = -round(float(result.source.runner.elo)*0.005, 2)
             result.new_elo = round(float(result.source.runner.elo) + float(result.elo_diff), 2)
-            result.runner.elo = result.new_elo
+            result.source.runner.elo = result.new_elo
         elif result.status == "DSQ":
             result.elo_diff = -round(float(result.source.runner.elo)*0.010, 2)
             result.new_elo = round(float(result.source.runner.elo) + float(result.elo_diff), 2)
-            result.runner.elo = result.new_elo
+            result.source.runner.elo = result.new_elo
         elif result.place == 0:
-            result.new_elo = result.runner.elo
+            result.new_elo = result.source.runner.elo
             result.elo_diff = 0
 
         result.source.runner.active = True
@@ -230,7 +230,11 @@ def set_runner_inactive(last_year):
     beginning_of_this_year = datetime(last_year+1, 1, 1, 00, 00, 00, 0, tz.gettz("CET"))
     with connection.cursor() as c:
         c.execute("UPDATE elo_runner SET active=0;")
-        c.execute(f"""UPDATE elo_runner SET active=1 WHERE id IN (SELECT elo_runner.id FROM elo_runner JOIN elo_result ON elo_runner.id=elo_result.runner_id WHERE elo_result.date >= '{beginning_of_last_year.strftime("%Y-%m-%d")}' AND elo_result.date < '{beginning_of_this_year}');""")
+        c.execute(f"""UPDATE elo_runner SET active=1 WHERE id IN (
+        SELECT elo_runner.id FROM elo_runner 
+        JOIN elo_result ON elo_runner.id=elo_source.runner_id 
+        JOIN elo_source ON elo_source.id=elo_result.source_id
+            WHERE elo_result.date >= '{beginning_of_last_year.strftime("%Y-%m-%d")}' AND elo_result.date < '{beginning_of_this_year}');""")
 
 
 def update_elo_runners_inactives():

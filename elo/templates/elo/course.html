@@ -35,7 +35,7 @@
                     {% else %}
                     <td></td>
                     {% endif %}
-                    <td><span class="emoji" aria-label="{{ result.runner.flag_emoji.aria_label }}">{{ result.runner.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a href="/elo/runner/{{ result.source.runner.pk }}/">{{ result.source.runner.fullname }}</a></td>
+                    <td><span class="emoji" aria-label="{{ result.source.runner.flag_emoji.aria_label }}">{{ result.source.runner.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a href="/elo/runner/{{ result.source.runner.pk }}/">{{ result.source.runner.fullname }}</a></td>
                     <td>{{ result.status }}</td>
                       {% if result.elo_diff == 0 %}
                         <td class="text-warning">{{ result.elo_diff }}</td>
