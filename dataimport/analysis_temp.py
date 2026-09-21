@@ -1,5 +1,7 @@
 import logging
 
+# TODO this file is deprecated. DB schema changed
+
 import matplotlib.pyplot as plt
 import numpy as np
 from django.db.models import Max, Min, Count

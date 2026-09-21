@@ -13,13 +13,9 @@ class PageView(models.Model):
 
 class Runner(models.Model):
     fullname = models.CharField(db_index=True)
-    helga_id = models.IntegerField(null=True, db_index=True) # REMOVED
     elo = models.DecimalField(default=1600.0, max_digits=7, decimal_places=2, db_index=True)
     number_of_valid_courses = models.PositiveIntegerField(default=0, db_index=True)
     sex = models.CharField(default="", max_length=1) # TODO replace with enum
-    abso = models.BooleanField(default=False, db_index=True) # REMOVED
-    fede = models.CharField(default="") # REMOVED
-    club = models.CharField(default="") # REMOVED
     nationality = models.CharField(default="")
     category = models.CharField(default="", max_length=5, db_index=True) # TODO replace with only age ?
     active = models.BooleanField(default=True, db_index=True)
@@ -28,7 +24,7 @@ class Runner(models.Model):
         return get_flag_from_nationality(self.nationality)
 
     def __str__(self):
-        return f"Name={self.fullname}\telo={self.elo}\thelga_id={self.helga_id}\tvalid-results={self.number_of_valid_courses}"
+        return f"Name={self.fullname}\telo={self.elo}\tvalid-results={self.number_of_valid_courses}"
 
 
 class Course(models.Model):
@@ -75,8 +71,7 @@ class Source(models.Model):
 class Result(models.Model):
     date = models.DateTimeField(db_index=True)
     ranking = models.ForeignKey(Ranking, on_delete=models.CASCADE)
-    runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING) # to remove
-    source = models.ForeignKey(Source, on_delete=models.DO_NOTHING, null=True) # remove null = true AFTER migration
+    source = models.ForeignKey(Source, on_delete=models.DO_NOTHING)
     place = models.IntegerField()
     time = models.TimeField(null=True)
     status = models.CharField()

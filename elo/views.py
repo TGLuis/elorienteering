@@ -6,9 +6,9 @@ from django.shortcuts import get_object_or_404
 from django.template import loader
 from django.core.paginator import Paginator
 
-from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache, get_all_clubs_from_cache
+from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache, get_all_clubs_from_cache, get_all_affiliations_from_cache
 from .utils import Navigation
-from .models import Runner, Result, Ranking, Course, Entry
+from .models import Runner, Result, Ranking, Course, Entry, Source
 from .fields import CourseStatus
 
 
@@ -33,10 +33,23 @@ def handle_filters(request):
         other_params.append("clubs="+clubs)
     return params, "&".join(other_params)
 
-def apply_filters(runners, filters):
+def apply_filters(filters):
+    affiliations = None
     if filters.get("countries"):
-        if filters.get("countries")[0] == "BEL":
-            runners = runners.filter(abso=True)
+        if affiliations is None:
+            affiliations = get_all_affiliations_from_cache()
+        affiliations.filter(country__in=filters.get("countries"))
+    if filters.get("clubs"):
+        if affiliations is None:
+            affiliations = get_all_affiliations_from_cache()
+        affiliations = affiliations.filter(club__in=filters.get("clubs"))
+
+    if affiliations is None:
+        runners = get_main_ranking_from_cache()
+    else:
+        affiliations = affiliations.select_related("runner")
+        runners = Runner.objects.filter(active=True, number_of_valid_courses__gte=3).filter(pk__in=affiliations.values_list("runner")).order_by("-elo")
+
     if filters.get("sex") and len(filters.get("sex")) == 1:
         if filters.get("sex")[0] == "W":
             runners = runners.filter(sex="F")
@@ -45,8 +58,7 @@ def apply_filters(runners, filters):
     if filters.get("age"):
         age_categories = ["D"+age for age in filters.get("age")] + ["H"+age for age in filters.get("age")]
         runners = runners.filter(category__in=age_categories)
-    if filters.get("clubs"):
-        runners = runners.filter(club__in=filters.get("clubs"))
+
     return runners
 
 def set_all_filters(filters_selected):
@@ -64,7 +76,7 @@ def set_all_filters(filters_selected):
 
 def index(request):
     filters_selected, other_params = handle_filters(request)
-    runners = apply_filters(get_main_ranking_from_cache(), filters_selected)
+    runners = apply_filters(filters_selected)
     pages = Paginator(runners, 100)
     page_number = int(request.GET.get("page", "1"))
     nav = Navigation(pages, page_number)
@@ -137,8 +149,11 @@ def courses(request):
 
 
 def ranking(request, ranking_id):
-    results = Result.objects.filter(ranking__pk=ranking_id)
-    ordered = chain(results.filter(status="OK").order_by("place"), results.exclude(status="OK").order_by("-status", "-new_elo"))
+    results = Result.objects.filter(ranking=ranking_id)
+    ordered = list(chain(results.filter(status="OK").exclude(place=0).order_by("place"),
+                         results.filter(place=0, status="OK").order_by("-new_elo"),
+                         results.exclude(status="OK").order_by("-status", "-new_elo"))
+                   )
     if not results:
         raise Http404("Ranking does not exist")
     template = loader.get_template("elo/ranking.html")
@@ -146,6 +161,7 @@ def ranking(request, ranking_id):
 
 
 def detail(request, runner_id):
+    # TODO verify that source is used instead of runner directly for the results
     runner = get_object_or_404(Runner, pk=runner_id)
     template = loader.get_template("elo/runner.html")
     results = Result.objects.filter(source__runner=runner).order_by("-date")
@@ -162,6 +178,8 @@ def detail(request, runner_id):
 
 
 def restless(request):
+    # TODO verify that source is used instead of runner directly for the results
+    # TODO add flags
     years = list(range(2005,datetime.date.today().year+1))
     if (active_year := request.GET.get("year", "year")) != "year":
         if int(active_year) not in years:
@@ -184,7 +202,8 @@ def about(request):
 
 
 def runner_data(request, runner_id):
-    results = Result.objects.filter(runner__pk=runner_id).order_by("date")
+    sources = Source.objects.filter(runner__pk=runner_id)
+    results = Result.objects.filter(source__in=sources).order_by("date")
     return JsonResponse({'dataset': [[result.date.timestamp() * 1000, float(result.new_elo)] for result in results]})
 
 

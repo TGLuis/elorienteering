@@ -169,11 +169,17 @@ def iterate_over_all_course_files():
         pre_process(filename.split(".")[0], f"{DIR_PATH}/data/courses/helga/{filename}")
 
 
-def get_runner_from_db(runner_name):
+def get_source_runner_from_db(runner_name):
     try:
-        runner = Runner.objects.get(fullname = runner_name)
         sources = Source.objects.filter(source_type=SourceType.HELGA_WEBRES, fullname_in_source=runner_name)
         if sources.count() == 0:
+            runners = Runner.objects.filter(fullname=runner_name)
+            if runners.count() == 0:
+                runner = Runner(fullname=runner_name)
+                runner.save()
+            else:
+                # If multiple runners with the same name, no way to distinguish them for now, first one is taken
+                runner = runners[0]
             source = Source(source_type=SourceType.HELGA_WEBRES, ext_runner_id=get_helga_id(runner_name), runner=runner, fullname_in_source=runner_name)
             source.save()
         elif sources.count() == 1:
@@ -183,17 +189,8 @@ def get_runner_from_db(runner_name):
             logger.error(f"{runner_name} has multiple sources with Helga webres.")
             logger.debug(f"{runner_name} has sources with Helga webres: {sources}")
             exit()
-        return runner, source
-    except Runner.DoesNotExist:
-        runner = Runner(fullname=runner_name)
-        runner.save()
-        source = Source(source_type=SourceType.HELGA_WEBRES, ext_runner_id=get_helga_id(runner_name), runner=runner, fullname_in_source=runner_name)
-        source.save()
-        return runner
+        return source
     except Exception as e:
-        if "get() returned more than one Runner" in str(e):
-            Runner.objects.filter(fullname=runner_name)[1].delete()
-            return get_runner_from_db(runner_name)
         logger.error("Exception in get_runner_from_db")
         logger.error(e)
         logger.debug(runner_name)
@@ -237,7 +234,7 @@ def import_courses_in_db():
                         continue
                     result = Result()
                     result.ranking = ranking
-                    runner, source = get_runner_from_db(result_json["name"])
+                    source = get_source_runner_from_db(result_json["name"])
                     result.source = source
                     result.place = result_json["position"]
                     try:
