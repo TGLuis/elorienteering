@@ -43,7 +43,6 @@ class Navigation:
 def get_flag_from_nationality(nationality:str ) -> dict :
     if nationality is None:
         return {}
-    # TODO code pays CIO instead of ISO ? to verify
     country = countries.get(alpha_3=nationality)
     if country is not None:
         return {'emoji': country.flag, 'aria_label': nationality}

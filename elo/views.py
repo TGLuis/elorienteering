@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.template import loader
 from django.core.paginator import Paginator
 
-from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache, get_all_clubs_from_cache, get_all_affiliations_from_cache
+from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache, get_all_clubs_from_cache, get_all_affiliations_from_cache, get_all_affiliation_countries_from_cache
 from .utils import Navigation
 from .models import Runner, Result, Ranking, Course, Entry, Source
 from .fields import CourseStatus
@@ -38,7 +38,7 @@ def apply_filters(filters):
     if filters.get("countries"):
         if affiliations is None:
             affiliations = get_all_affiliations_from_cache()
-        affiliations.filter(country__in=filters.get("countries"))
+        affiliations = affiliations.filter(country__in=filters.get("countries"))
     if filters.get("clubs"):
         if affiliations is None:
             affiliations = get_all_affiliations_from_cache()
@@ -65,8 +65,9 @@ def set_all_filters(filters_selected):
     categories = get_all_categories_from_cache()
     age_categories = sorted({category[1:] for category in categories})
     clubs = get_all_clubs_from_cache()
+    countries = get_all_affiliation_countries_from_cache()
     all_filters = {
-        "countries": {"BEL": "BEL" in filters_selected["countries"]},
+        "countries": {c: c in filters_selected["countries"] for c in countries},
         "sex": {"M": "M" in filters_selected["sex"], "W": "W" in filters_selected["sex"]},
         "age": {age: age in filters_selected["age"] for age in age_categories},
         "clubs": {club: club in filters_selected["clubs"] for club in clubs}

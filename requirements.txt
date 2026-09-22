@@ -7,3 +7,4 @@ xmltodict
 django-enum
 pytest
 pycountry
+country_converter

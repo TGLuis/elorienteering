@@ -48,3 +48,10 @@ def get_all_clubs_from_cache():
         "clubs",list(Affiliation.objects.exclude(club="").values_list("club", flat=True).distinct()),
         timeout=2592000  # 30 days
     )
+
+def get_all_affiliation_countries_from_cache():
+    return cache.get_or_set(
+        "affiliation_countries",list(Affiliation.objects.exclude(country="").values_list("country", flat=True).distinct()),
+        timeout=2592000  # 30 days
+    )
+
