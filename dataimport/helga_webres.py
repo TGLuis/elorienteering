@@ -17,6 +17,13 @@ from elo.fields import SourceType, CourseType, CourseStatus, CourseSubType
 
 logger = logging.getLogger(__name__)
 DIR_PATH = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+# TODO convert countries from IOC to ISO3
+# import country_converter as coco
+# cc = coco.CountryConverter()
+# ioc_iso3 = cc.get_correspondence_dict('IOC', 'ISO3')
+# ioc_iso3['NED'] ==> 'NLD'
+# TODO change code + all DB valules !
+
 countries = ["BEL", "NED", "FRA", "LUX", "GER", "SWE"]
 
 def download_courses():

@@ -71,7 +71,7 @@ class Source(models.Model):
 class Result(models.Model):
     date = models.DateTimeField(db_index=True)
     ranking = models.ForeignKey(Ranking, on_delete=models.CASCADE)
-    source = models.ForeignKey(Source, on_delete=models.DO_NOTHING)
+    source = models.ForeignKey(Source, on_delete=models.DO_NOTHING, null=True) # remove null = true AFTER migration
     place = models.IntegerField()
     time = models.TimeField(null=True)
     status = models.CharField()
