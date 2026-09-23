@@ -7,8 +7,8 @@ from django.template import loader
 from django.core.paginator import Paginator
 
 from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache, get_all_clubs_from_cache, get_all_affiliations_from_cache, get_all_affiliation_countries_from_cache
-from .utils import Navigation
-from .models import Runner, Result, Ranking, Course, Entry, Source
+from .utils import Navigation, get_flag_from_nationality
+from .models import Runner, Result, Ranking, Course, Entry, Source, Affiliation
 from .fields import CourseStatus
 
 
@@ -162,14 +162,18 @@ def ranking(request, ranking_id):
 
 
 def detail(request, runner_id):
-    # TODO verify that source is used instead of runner directly for the results
+    # TODO display affiliations + sources
     runner = get_object_or_404(Runner, pk=runner_id)
+    affiliations = Affiliation.objects.filter(runner=runner)
+    sources = Source.objects.filter(runner=runner)
     template = loader.get_template("elo/runner.html")
     results = Result.objects.filter(source__runner=runner).order_by("-date")
     total_delta = [datetime.timedelta(hours=result.time.hour,minutes=result.time.minute,seconds=result.time.second).total_seconds() for result in results if result.time is not None]
     context = {
         "runner": runner,
         "results": results,
+        "affiliations": affiliations,
+        "source": sources,
         "number_of_results": len(results.exclude(status="DNS")),
         "pm_percentage": round(100*len(results.filter(status="NCL"))/len(results.exclude(status="DNS")), 2) if len(results.exclude(status="DNS")) > 0 else "Not applicable",
         "highest_elo": max(results[:len(results)-30], key=lambda x: x.new_elo).new_elo if len(results) > 30 else "-",
@@ -179,8 +183,6 @@ def detail(request, runner_id):
 
 
 def restless(request):
-    # TODO verify that source is used instead of runner directly for the results
-    # TODO add flags
     years = list(range(2005,datetime.date.today().year+1))
     if (active_year := request.GET.get("year", "year")) != "year":
         if int(active_year) not in years:
@@ -191,8 +193,17 @@ def restless(request):
     page_number = int(request.GET.get("page", "1"))
     nav = Navigation(pages, page_number)
     current_page = pages.page(page_number)
-    the_runners = [{"name": runner["source__runner__fullname"], "pk": runner["source__runner__pk"], "count": runner["count"], "place": x}
-    for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
+    the_runners = [
+        {
+            "name": runner["source__runner__fullname"],
+            "pk": runner["source__runner__pk"],
+            "flag": get_flag_from_nationality(runner["source__runner__nationality"])["emoji"],
+            "nationality": runner["source__runner__nationality"],
+            "count": runner["count"],
+            "place": x
+        }
+        for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)
+    ]
     context = {"runners" : the_runners, "nav": nav, "base": f"restless/", "years": years[::-1], "active_year":active_year, "other_params":f"&year={active_year}"}
     return HttpResponse(template.render(context, request))
 

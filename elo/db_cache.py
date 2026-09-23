@@ -8,7 +8,7 @@ def get_restless_from_cache(active_year):
     if active_year == "year":
         return cache.get_or_set(
             "restless_year",
-            (Result.objects.filter(status="OK").values("source__runner__fullname", "source__runner__pk")
+            (Result.objects.filter(status="OK").values("source__runner__fullname", "source__runner__pk", "source__runner__nationality")
              .annotate(count=Count("source__runner")).filter(count__gte=3).order_by("-count")),
             timeout=14400  # 4 hours
         )

@@ -40,7 +40,7 @@
                 {% for runner in runners %}
                 <tr>
                     <td>{{ runner.place }}</td>
-                    <td><a href="/elo/runner/{{ runner.pk }}/">{{ runner.name }}</a></td>
+                    <td><span class="emoji" aria-label="{{ runner.nationality }}">{{ runner.flag }}</span>&nbsp;&nbsp;<a href="/elo/runner/{{ runner.pk }}/">{{ runner.name }}</a></td>
                     <td>{{ runner.count }}</td>
                 </tr>
                 {% endfor %}
