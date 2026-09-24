@@ -16,7 +16,7 @@ def get_restless_from_cache(active_year):
         f"restless_year-{active_year}",
         (Result.objects.filter(status="OK", date__gte=f"{active_year}-01-01 00:00+01:00",
                                date__lt=f"{int(active_year) + 1}-01-01 00:00+01:00")
-         .values("source__runner__fullname", "source__runner__pk")
+         .values("source__runner__fullname", "source__runner__pk", "source__runner__nationality")
          .annotate(count=Count("source__runner")).filter(count__gte=3).order_by("-count")),
         timeout=14400  # 4 hours
     )
