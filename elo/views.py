@@ -162,7 +162,6 @@ def ranking(request, ranking_id):
 
 
 def detail(request, runner_id):
-    # TODO display affiliations + sources
     runner = get_object_or_404(Runner, pk=runner_id)
     affiliations = Affiliation.objects.filter(runner=runner)
     sources = Source.objects.filter(runner=runner)
@@ -173,7 +172,7 @@ def detail(request, runner_id):
         "runner": runner,
         "results": results,
         "affiliations": affiliations,
-        "source": sources,
+        "sources": sources,
         "number_of_results": len(results.exclude(status="DNS")),
         "pm_percentage": round(100*len(results.filter(status="NCL"))/len(results.exclude(status="DNS")), 2) if len(results.exclude(status="DNS")) > 0 else "Not applicable",
         "highest_elo": max(results[:len(results)-30], key=lambda x: x.new_elo).new_elo if len(results) > 30 else "-",
@@ -220,8 +219,8 @@ def runner_data(request, runner_id):
 
 
 def runner_search(request):
-    runners = Runner.objects.filter(fullname__icontains=request.GET['runner_pattern'])[:10]
-    return JsonResponse([{"name":runner.fullname,"url":f"/elo/runner/{runner.pk}"} for runner in runners], safe=False)
+    sources = Source.objects.filter(fullname_in_source__icontains=request.GET['runner_pattern'])[:10]
+    return JsonResponse([{"name":source.fullname_in_source,"url":f"/elo/runner/{source.runner.pk}"} for source in sources], safe=False)
 
 
 def runner_compare(request):

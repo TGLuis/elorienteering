@@ -17,7 +17,7 @@ class Runner(models.Model):
     number_of_valid_courses = models.PositiveIntegerField(default=0, db_index=True)
     sex = models.CharField(default="", max_length=1) # TODO replace with enum
     nationality = models.CharField(default="")
-    category = models.CharField(default="", max_length=5, db_index=True) # TODO replace with only age ?
+    category = models.CharField(default="", max_length=5, db_index=True) # TODO replace with only age ? or year of birth
     active = models.BooleanField(default=True, db_index=True)
 
     def flag_emoji(self):

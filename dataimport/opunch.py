@@ -10,12 +10,9 @@ frso_url = "https://www.opunch.org/organization/FRSO/members?key={}"
 luxo_url = "https://www.opunch.org/organization/LUXO/members?key={}"
 logger = logging.getLogger(__name__)
 
-# TODO convert countries from IOC to ISO3
 import country_converter as coco
 cc = coco.CountryConverter()
 ioc_iso3 = cc.get_correspondence_dict('IOC', 'ISO3')
-# ioc_iso3['NED'] ==> 'NLD'
-# TODO change code + all DB valules !
 
 os.environ["OPUNCH_KEY"] = "1f4eb968-755a-47ae-9a22-8c71c69008a1"
 

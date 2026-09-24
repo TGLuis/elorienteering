@@ -2,7 +2,7 @@ from django.db import models
 
 class SourceType(models.IntegerChoices):
     UNKNOWN = 0, "unknown"
-    HELGA_WEBRES = 1, "helga webres"
+    HELGA_WEBRES = 1, "Helga Webres"
     LIVERESULT_SE = 2, "liveresults.se"
     FFCO_CN = 3, "ffco cn"
     HELGA_START = 4, "helga start"
