@@ -67,6 +67,11 @@ class Source(models.Model):
     runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING, null=True)
     fullname_in_source = models.CharField(db_index=True, null=True)
 
+    def link(self):
+        if self.source_type == SourceType.HELGA_WEBRES:
+            return f"https://helga-o.com/webres/index.php?runner={self.ext_runner_id}"
+        return ""
+
 
 class Result(models.Model):
     date = models.DateTimeField(db_index=True)

@@ -134,15 +134,17 @@
                 <div class="col align-self-center">
                   <h4 class="m-2">Source of results:</h4>
                   {% for source in sources %}
-                  <p>{{ source.source_type.label }} - {{ source.fullname_in_source }} - with id: {{ source.ext_runner_id }}</p>
+                  {{ source.source_type.label }} - <a target="_blank" href="{{ source.link }}">{{ source.fullname_in_source }}</a><br>
                   {% endfor %}
                 </div>
+                {% if affiliations %}
                 <div class="col align-self-center">
                   <h4 class="m-2">Affiliated in:</h4>
                   {% for affiliation in affiliations %}
-                  <p>{{ affiliation.country }} - {{ affiliation.fede }} - {{ affiliation.club }}</p>
+                  {{ affiliation.country }} - {{ affiliation.fede }} - {{ affiliation.club }}<br>
                   {% endfor %}
                 </div>
+                {% endif %}
               </div>
             </div>
 
