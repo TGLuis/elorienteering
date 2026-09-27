@@ -33,7 +33,7 @@
                     {% else %}
                     <td></td>
                     {% endif %}
-                    <td><span class="emoji" aria-label="{{ result.source.runner.flag_emoji.aria_label }}">{{ result.source.runner.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a href="/elo/runner/{{ result.source.runner.pk }}/">{{ result.source.fullname_in_source }}</a></td>
+                    <td><span class="emoji" aria-label="{{ result.source.runner.flag_emoji.aria_label }}">{{ result.source.runner.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a href="/elo/runner?id={{ result.source.runner.pk }}">{{ result.source.fullname_in_source }}</a></td>
                     <td>{{ result.status }}</td>
                       {% if result.elo_diff == 0 %}
                         <td class="text-warning">{{ result.elo_diff }}</td>
@@ -49,7 +49,7 @@
                 {% endfor %}
               </tbody>
           </table>
-          <h4 class="m-4 text-center"><a href="/elo/course/{{ ranking.course.pk }}/">See all course results</a></h4>
+          <h4 class="m-4 text-center"><a href="/elo/course?id={{ ranking.course.pk }}">See all course results</a></h4>
           <h3 class="m-4 text-center"><a target="_blank" href="https://helga-o.com/webres/index.php?lang=fr&lauf={{ ranking.course.source_id }}#{{ ranking.name }}">See on Helga</a></h3>
         </div>
       </div>

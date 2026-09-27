@@ -29,13 +29,13 @@
                   <div class="col">
                     <div class="collapse" id="filters">
                       <div class="card card-body text-start">
-                        {% for name, filters in all_filters.items %}
-                            <h4>{{ name }}</h4>
+                        {% for filter in all_filters %}
+                            <h4>{{ filter.display }}</h4>
                             <div class="row">
-                                <div class="form-group" id="{{ name }}">
-                                    {% for filter, checked in filters.items %}
-                                    <label class="form-check-label" for="{{ filter }}">
-                                        <input class="form-check-input" type="checkbox" value="" id="{{ filter }}" {% if checked %}checked{% endif %}>{{ filter }}
+                                <div class="form-group" id="{{ filter.id }}">
+                                    {% for filter_name, checked in filter.vals.items %}
+                                    <label class="form-check-label" for="{{ filter_name }}">
+                                        <input class="form-check-input" type="checkbox" value="" id="{{ filter_name }}" {% if checked %}checked{% endif %}>{{ filter_name }}
                                     </label>
                                     {% endfor %}
                                 </div>
@@ -64,7 +64,7 @@
                 {% for runner in runners %}
                 <tr>
                     <td>{{ runner.place }}</td>
-                    <td><span class="emoji" aria-label="{{ runner.properties.flag_emoji.aria_label }}">{{ runner.properties.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a href="/elo/runner/{{ runner.properties.pk }}/">{{ runner.properties.fullname }}</a></td>
+                    <td><span class="emoji" aria-label="{{ runner.properties.flag_emoji.aria_label }}">{{ runner.properties.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a href="/elo/runner?id={{ runner.properties.pk }}">{{ runner.properties.fullname }}</a></td>
                     <td>{{ runner.properties.elo }}</td>
                 </tr>
                 {% endfor %}
@@ -72,6 +72,7 @@
           </table>
           {% include "nav.html" %}
         </div>
+      </div>
       </div>
   </main>
 

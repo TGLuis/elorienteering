@@ -25,5 +25,7 @@ def redirect_source_to_runner(dups: dict, source_type: SourceType):
 def main():
     redirect_source_to_runner(get_duplicates_in_file("dataimport/data/merges-helga.txt"), SourceType.HELGA_WEBRES)
 
+    # TODO maybe one day, delete runners without sources ?
+
 if __name__ == "__main__":
     main()

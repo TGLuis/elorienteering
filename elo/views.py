@@ -66,12 +66,12 @@ def set_all_filters(filters_selected):
     age_categories = sorted({category[1:] for category in categories})
     clubs = get_all_clubs_from_cache()
     countries = get_all_affiliation_countries_from_cache()
-    all_filters = {
-        "countries": {c: c in filters_selected["countries"] for c in countries},
-        "sex": {"M": "M" in filters_selected["sex"], "W": "W" in filters_selected["sex"]},
-        "age": {age: age in filters_selected["age"] for age in age_categories},
-        "clubs": {club: club in filters_selected["clubs"] for club in clubs}
-    }
+    all_filters = [
+        {"id": "countries", "display": "Affiliated in", "vals": {c: c in filters_selected["countries"] for c in countries}},
+        {"id": "sex", "display": "Gender", "vals": {"M": "M" in filters_selected["sex"], "W": "W" in filters_selected["sex"]}},
+        {"id": "age", "display": "Age category", "vals": {age: age in filters_selected["age"] for age in age_categories}},
+        {"id": "clubs", "display": "In club", "vals": {club: club in filters_selected["clubs"] for club in clubs}}
+    ]
     return all_filters
 
 
@@ -100,10 +100,9 @@ def compare(request):
     return HttpResponse(template.render({}, request))
 
 
-def course(request, course_pk):
-    course = Course.objects.filter(pk=course_pk).first()
-    if not course:
-        raise Http404("Course does not exist")
+def course(request):
+    course_id = request.GET.get("id")
+    course = get_object_or_404(Course, pk=course_id)
     db_rankings = Ranking.objects.filter(course=course).order_by("name")
     rankings = []
     for db_ranking in db_rankings:
@@ -122,10 +121,9 @@ def course(request, course_pk):
     return HttpResponse(template.render({"course": course, "rankings": rankings}, request))
 
 
-def future(request, course_pk):
-    course = Course.objects.filter(pk=course_pk).first()
-    if not course:
-        raise Http404("Course does not exist")
+def future(request):
+    course_id = request.GET.get("id")
+    course = get_object_or_404(Course, pk=course_id)
     db_rankings = Ranking.objects.filter(course=course).order_by("name")
     rankings = []
     for db_ranking in db_rankings:
@@ -149,19 +147,20 @@ def courses(request):
     return HttpResponse(template.render({"future": future, "past": past}, request))
 
 
-def ranking(request, ranking_id):
-    results = Result.objects.filter(ranking=ranking_id)
+def ranking(request):
+    ranking_id = request.GET.get("id")
+    ranking = get_object_or_404(Ranking, pk=ranking_id)
+    results = Result.objects.filter(ranking=ranking)
     ordered = list(chain(results.filter(status="OK").exclude(place=0).order_by("place"),
                          results.filter(place=0, status="OK").order_by("-new_elo"),
                          results.exclude(status="OK").order_by("-status", "-new_elo"))
                    )
-    if not results:
-        raise Http404("Ranking does not exist")
     template = loader.get_template("elo/ranking.html")
     return HttpResponse(template.render({"results": ordered, "ranking": results.first().ranking}, request))
 
 
-def detail(request, runner_id):
+def detail(request):
+    runner_id = request.GET.get("id")
     runner = get_object_or_404(Runner, pk=runner_id)
     affiliations = Affiliation.objects.filter(runner=runner)
     sources = Source.objects.filter(runner=runner)
@@ -203,7 +202,7 @@ def restless(request):
         }
         for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)
     ]
-    context = {"runners" : the_runners, "nav": nav, "base": f"restless/", "years": years[::-1], "active_year":active_year, "other_params":f"&year={active_year}"}
+    context = {"runners" : the_runners, "nav": nav, "base": f"restless", "years": years[::-1], "active_year":active_year, "other_params":f"&year={active_year}"}
     return HttpResponse(template.render(context, request))
 
 
@@ -212,7 +211,8 @@ def about(request):
     return HttpResponse(template.render({}, request))
 
 
-def runner_data(request, runner_id):
+def runner_data(request):
+    runner_id = request.GET.get("id")
     sources = Source.objects.filter(runner__pk=runner_id)
     results = Result.objects.filter(source__in=sources).order_by("date")
     return JsonResponse({'dataset': [[result.date.timestamp() * 1000, float(result.new_elo)] for result in results]})
@@ -220,7 +220,7 @@ def runner_data(request, runner_id):
 
 def runner_search(request):
     sources = Source.objects.filter(fullname_in_source__icontains=request.GET['runner_pattern'])[:10]
-    return JsonResponse([{"name":source.fullname_in_source,"url":f"/elo/runner/{source.runner.pk}"} for source in sources], safe=False)
+    return JsonResponse([{"name":source.fullname_in_source,"url":f"/elo/runner?id={source.runner.pk}"} for source in sources], safe=False)
 
 
 def runner_compare(request):

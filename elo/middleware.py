@@ -8,7 +8,7 @@ class PageViewMiddleware:
     def __call__(self, request):
         response = self.get_response(request)
         path = request.path
-        if "api" in path or "admin" in path:
+        if response.status_code != 200:
             return response
 
         # Check if the count is in the cache

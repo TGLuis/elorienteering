@@ -92,7 +92,7 @@
     }
 
     function addRunnerToList(runner) {
-        fetch('/elo/api/runner/'+runner.id)
+        fetch('/elo/api/runner?id='+runner.id)
             .then(response => response.json())
             .then(data => {
               const tr = document.createElement('tr');
