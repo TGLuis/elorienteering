@@ -62,5 +62,8 @@ def normal_run():
     process_elo()
     helga_start_main()
 
+# TODO export + clean PageView data with cronjob
+
+
 if __name__ == "__main__":
     rerun_all()
