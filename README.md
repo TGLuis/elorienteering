@@ -4,56 +4,26 @@ This project aims to do a classification based of elo calculations of the helga 
 
 ## Features yet to be implemented
 
-### Requirements before V1
-
-- [x] paginations to have only 100 runners per page with an arrow to fetch the next/previous. (for load time perf)
-- [x] about page to explain the project and reference github and helga.
-- [x] simple stat of page load to get an idea of the number of calls to this website.
-
-### Short term
-
-- [x] x axis of graphs should be linear in time and not in number of results.
-- [x] exclude by default all runners with less than 3 results (to remove the one time team names).
-- [x] Use first 3 courses to have a start-elo.
-- [x] handle better the relays (only compare with the same startnumber) for elo calculation.
-- [x] display the difference of elo gained over the course.
-- [x] search a runner with the search button.
-- [x] Only compute new courses instead of everything from the start.
-- [x] Launch a cronjob with django to load courses and recompute elo everyday at 2AM.
-- [x] Using cache at least for index/about page
-- [x] add link to "challenge de régularité national" https://hoekx.be/natcrit/
-- [x] add a favicon
-- [x] fix relays
-
-### Long term
-
-- [x] Graph with dynamic add/remove of runners to compare evolution.
-- [x] prediction of a course based on helga-start.
-- [x] ranking only of abso/bvos licensed runners. 
-- [ ] dashboard for a runner with stats
-  - General
-    - [x] number of results
-    - [x] total time running
-    - [x] NCL percentage
-    - [ ] best/current OK streak (ignoring DNS)
-  - with more than 30 results
-    - [ ] Best increase ?
-    - [x] highest elo
-    - [ ] percentile ?
-    - [ ] Helga for runner with more than 30 results ?
-  - if BE
-    - [ ] rank in BE
-    - [ ] ?
-  - [ ] Separate elo details to another page for efficiency time? not necessary right now
-- [x] Get a graph with distribution of elo (for runner with more than 3 results)
-- [x] merging D & H of a same circuit to have a better comparison between women and men elo.
+- [ ] Compare page, add ids of runner in url to be able to share a completed graph
+- [ ] Get a graph with distribution of elo (for runner with more than 3 results and active ?) in about page
+- [ ] Cronjob to export and delete pageview data
+- [ ] sitemap.xml
 - [ ] Translation in french + dutch
+- [ ] Adding FFCO CN courses
+- [ ] Adding FFCO affiliated
 
 ## How to contribute
 
 Python 3.10 minimum (to use the same Django version) ! I use python 3.14. Please do a PR if you want to add something or open an issue if you just have some suggestion.
 
 ### Launch the project
+
+Create a `.env` file with the following variables:
+
+```txt
+PYTHONUNBUFFERED=1
+DJANGO_SECRET_KEY="<generate a random key here>"
+```
 
 Create a virtual environment with your ide or python command and install the packages in requirements.txt.
 
