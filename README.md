@@ -6,7 +6,7 @@ This project aims to do a classification based of elo calculations of the helga 
 
 - [ ] Compare page, add ids of runner in url to be able to share a completed graph
 - [ ] Get a graph with distribution of elo (for runner with more than 3 results and active ?) in about page
-- [ ] Cronjob to export and delete pageview data
+- [x] Cronjob to export and delete pageview data
 - [ ] sitemap.xml
 - [ ] Translation in french + dutch
 - [ ] Adding FFCO CN courses

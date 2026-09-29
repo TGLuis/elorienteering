@@ -6,7 +6,7 @@ from dataimport.calculate import elo_for_courses as process_elo, rollback_to_dat
 from dataimport.helga_webres import download_courses as helga_download_courses
 from dataimport.helga_webres import import_courses_in_db as helga_import_courses
 from dataimport.helga_start import main as helga_start_main
-from elo.models import Runner,Course
+from elo.models import Runner,Course,PageView
 from elo.fields import CourseStatus
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,11 @@ def normal_run():
     process_elo()
     helga_start_main()
 
-# TODO export + clean PageView data with cronjob
+def export_and_clean_page_data():
+    pages = PageView.objects.filter(count__gt=2).order_by("-count")
+    with open("dataimport/data/pages.txt", "a+") as f:
+        f.write(",".join([f"{p.path}={p.count}" for p in pages])+ "\n")
+    PageView.objects.all().delete()
 
 
 if __name__ == "__main__":

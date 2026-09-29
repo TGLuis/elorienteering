@@ -56,8 +56,9 @@ MIDDLEWARE = [
 
 CRONJOBS = [
     ('0 1 * * *', 'dataimport.cron.normal_run'), # every day
+    ('0 0 * * *', 'dataimport.cron.export_and_clean_page_data'), # everyday at midnight
     ('0 2 1 2 *', 'dataimport.cron.rerun_all'), # every 1st february
-    ('0 4 * * 1', 'dataimport.opunch.import_be') # every monday
+    ('0 4 * * 1', 'dataimport.opunch.import_be'), # every monday
 ]
 
 ROOT_URLCONF = 'elorienteering.urls'
