@@ -41,32 +41,47 @@ def display_ncl_percentage_per_runner(name):
           len(Result.objects.filter(runner=runner))
     )
 
-def distribution_of_elo_update():
-    runner_with_more_than_30_results = Result.objects.filter(status="OK").values("source__runner__fullname", "source__runner__pk").annotate(count=Count("runner")).order_by("-count").filter(count__gte=31)
+def get_distribution_of_elo_update_data():
+    runner_with_more_than_30_results = (Result.objects.filter(status="OK").values("source__runner__fullname", "source__runner__pk").
+                                        annotate(count=Count("source__runner")).order_by("-count").filter(count__gte=31))
     results = []
     for runner in runner_with_more_than_30_results:
-        results.extend(list(Result.objects.filter(status="OK",source__runner__pk=runner['source__runner__pk']).exclude(place=0).exclude(elo_diff=0.00).order_by("date")[31:]))
-    elo_diff_array = np.array([float(res.elo_diff) for res in results])
+        results.extend(list(Result.objects.filter(status="OK",source__runner__pk=runner['source__runner__pk']).exclude(place=0).
+                            exclude(elo_diff=0.00).order_by("date")[31:]))
+    return np.array([float(res.elo_diff) for res in results])
+
+def distribution_of_elo_update():
+    elo_diff_array = get_distribution_of_elo_update_data()
     # Calculate basic statistics
     logger.info(f"Mean: {np.mean(elo_diff_array):.2f}")
     logger.info(f"Standard Deviation: {np.std(elo_diff_array):.2f}")
-    plt.hist(elo_diff_array, bins=300, density=True)
+    plt.hist(elo_diff_array, bins=100, density=True)
     plt.title("elo diff Distribution", fontsize=18)
     plt.xlabel("Value", fontsize=14)
     plt.ylabel("Frequency", fontsize=14)
     plt.show()
     return elo_diff_array
 
+
+def get_distribution_of_elo_data():
+    runner_with_more_than_3_results = Runner.objects.filter(number_of_valid_courses__gt=3,active=True)
+    return [float(runner.elo) for runner in runner_with_more_than_3_results]
+
+
 def distribution_of_elo():
-    runner_with_more_than_3_results = Runner.objects.filter(number_of_valid_courses__gt=3)
-    elo_array = np.array([float(runner.elo) for runner in runner_with_more_than_3_results])
+    elo_array = np.array(get_distribution_of_elo_data())
     # Calculate basic statistics
     logger.info(f"Mean: {np.mean(elo_array):.2f}")
     logger.info(f"Standard Deviation: {np.std(elo_array):.2f}")
-    plt.hist(elo_array, bins=100, density=True)
+    plt.hist(elo_array, bins=20, density=False)
     plt.title("elo Distribution", fontsize=18)
-    plt.xlabel("Value", fontsize=14)
-    plt.ylabel("Frequency", fontsize=14)
+    plt.xlabel("ELO", fontsize=14)
+    plt.ylabel("Number of people", fontsize=14)
     plt.show()
     return elo_array
+
+
+if __name__ == "__main__":
+    distribution_of_elo_update()
+    distribution_of_elo()
 

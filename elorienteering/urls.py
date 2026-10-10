@@ -75,6 +75,7 @@ class StaticViewSitemap(Sitemap):
 
 urlpatterns = [
     path("", RedirectView.as_view(url="/elo/"), name="root"),
+    path("email/", include("sendemail.urls")),
     path("elo/", include("elo.urls")),
     path("admin/", admin.site.urls),
     path("sitemap.xml", sitemap, {"sitemaps": {

@@ -11,6 +11,8 @@ This project aims to do a classification based of elo calculations of the helga 
 - [ ] Translation in french + dutch
 - [ ] Adding FFCO CN courses
 - [ ] Adding FFCO affiliated
+- [ ] Add contact form
+- [ ] duel page
 
 ## How to contribute
 

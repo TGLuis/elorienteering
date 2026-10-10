@@ -1,12 +1,13 @@
 import datetime
 from itertools import chain
+from time import time
 
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.template import loader
 from django.core.paginator import Paginator
 
-from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache, get_all_clubs_from_cache, get_all_affiliations_from_cache, get_all_affiliation_countries_from_cache
+from .db_cache import get_restless_from_cache, get_main_ranking_from_cache, get_all_categories_from_cache, get_all_clubs_from_cache, get_all_affiliations_from_cache, get_all_affiliation_countries_from_cache, get_elo_data, get_elo_update_data
 from .utils import Navigation, get_flag_from_nationality
 from .models import Runner, Result, Ranking, Course, Entry, Source, Affiliation
 from .fields import CourseStatus
@@ -82,7 +83,7 @@ def index(request):
     page_number = int(request.GET.get("page", "1"))
     nav = Navigation(pages, page_number)
     current_page = pages.page(page_number)
-    template = loader.get_template("elo/index.html")
+    template = loader.get_template("index.html")
     the_runners = [{"properties": runner, "place": x} for x,runner in zip(range(current_page.start_index(), current_page.end_index()+1), current_page)]
     all_filters = set_all_filters(filters_selected)
     context = {
@@ -96,7 +97,7 @@ def index(request):
 
 
 def compare(request):
-    template = loader.get_template("elo/compare.html")
+    template = loader.get_template("compare.html")
     return HttpResponse(template.render({}, request))
 
 
@@ -117,7 +118,7 @@ def course(request):
         }
         if len(ranking["results"]):
             rankings.append(ranking)
-    template = loader.get_template("elo/course.html")
+    template = loader.get_template("course.html")
     return HttpResponse(template.render({"course": course, "rankings": rankings}, request))
 
 
@@ -137,13 +138,13 @@ def future(request):
         }
         if len(ranking["entries"]):
             rankings.append(ranking)
-    template = loader.get_template("elo/future.html")
+    template = loader.get_template("future.html")
     return HttpResponse(template.render({"course": course, "rankings": rankings}, request))
 
 def courses(request):
     future = Course.objects.filter(status=CourseStatus.FUTURE).order_by("-date")
     past = Course.objects.exclude(status=CourseStatus.FUTURE).order_by("-date")[:50]
-    template = loader.get_template("elo/courses.html")
+    template = loader.get_template("courses.html")
     return HttpResponse(template.render({"future": future, "past": past}, request))
 
 
@@ -155,7 +156,7 @@ def ranking(request):
                          results.filter(place=0, status="OK").order_by("-new_elo"),
                          results.exclude(status="OK").order_by("-status", "-new_elo"))
                    )
-    template = loader.get_template("elo/ranking.html")
+    template = loader.get_template("ranking.html")
     return HttpResponse(template.render({"results": ordered, "ranking": results.first().ranking}, request))
 
 
@@ -164,7 +165,7 @@ def detail(request):
     runner = get_object_or_404(Runner, pk=runner_id)
     affiliations = Affiliation.objects.filter(runner=runner)
     sources = Source.objects.filter(runner=runner)
-    template = loader.get_template("elo/runner.html")
+    template = loader.get_template("runner.html")
     results = Result.objects.filter(source__runner=runner).order_by("-date")
     total_delta = [datetime.timedelta(hours=result.time.hour,minutes=result.time.minute,seconds=result.time.second).total_seconds() for result in results if result.time is not None]
     context = {
@@ -185,7 +186,7 @@ def restless(request):
     if (active_year := request.GET.get("year", "year")) != "year":
         if int(active_year) not in years:
             raise Http404(f"Year {request.GET.get('year')} does not have any result")
-    template = loader.get_template("elo/restless.html")
+    template = loader.get_template("restless.html")
     runners = get_restless_from_cache(active_year)
     pages = Paginator(runners, 100)
     page_number = int(request.GET.get("page", "1"))
@@ -207,8 +208,11 @@ def restless(request):
 
 
 def about(request):
-    template = loader.get_template("elo/about.html")
-    return HttpResponse(template.render({}, request))
+    template = loader.get_template("about.html")
+    distib_labels, distrib_values = get_elo_data()
+    update_labels, update_values = get_elo_update_data()
+    context = {'distrib': {'labels': distib_labels, 'values': distrib_values}, 'update': {'labels': update_labels, 'values': update_values}}
+    return HttpResponse(template.render(context, request))
 
 
 def runner_data(request):

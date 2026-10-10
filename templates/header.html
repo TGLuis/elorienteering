@@ -6,7 +6,8 @@
                 <img src="{% static 'lost_coureur-40x40.png' %}" height="40px" width="40px" alt="Coureur lost"/>
                 <span class="fs-4">ELOrienteering</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#myNavbar1" aria-controls="myNavbar1" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#myNavbar1"
+                    aria-controls="myNavbar1" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="myNavbar1">
@@ -14,9 +15,11 @@
                     <li class="nav-item"><a href="/elo/courses" class="nav-link">Courses</a></li>
                     <li class="nav-item"><a href="/elo/restless" class="nav-link">Restless</a></li>
                     <li class="nav-item"><a href="/elo/compare" class="nav-link">Compare</a></li>
+                    <li class="nav-item"><a href="/email/contact" class="nav-link">Contact</a></li>
                     <li class="nav-item"><a href="/elo/about" class="nav-link">About</a></li>
                     <li class="nav-item">
-                        <input class="form-control me-2" type="text" id="searchInput" placeholder="Type runner name..." autocomplete="off" style="width:200px;" />
+                        <input class="form-control me-2" type="text" id="searchInput" placeholder="Type runner name..."
+                               autocomplete="off" style="width:200px;"/>
                         <div id="autocomplete-list"></div>
                     </li>
                 </ul>
@@ -24,7 +27,7 @@
         </div>
     </nav>
 </header>
- <script>
+<script>
     const searchInput = document.getElementById('searchInput');
     const autocompleteList = document.getElementById('autocomplete-list');
 

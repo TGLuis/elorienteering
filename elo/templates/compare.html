@@ -1,81 +1,87 @@
 <!doctype html>
 {% load static %}
 <html lang="en-US">
-  <head>
-    <meta charset="utf-8" />
+<head>
+    <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="This page allows to compare the runners in a timely manner, to see how the trends are evolving.">
+    <meta name="description"
+          content="This page allows to compare the runners in a timely manner, to see how the trends are evolving.">
     <title>ELOrienteering</title>
-    <link rel="icon" type="image/png" href="{% static 'favicon.png' %}" >
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  </head>
-  <body>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-scale-timestack/dist/chartjs-scale-timestack.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>
+    <link rel="icon" type="image/png" href="{% static 'favicon.png' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-scale-timestack/dist/chartjs-scale-timestack.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js"></script>
 
-  {% include "header_search.html" %}
+{% include "header.html" %}
 
-  <main>
+<main>
     <div>
         <h1 class="m-4 text-center">Compare runners</h1>
-      <div class="container" align="center">
-        <input type="text" id="searchRunner" placeholder="Type runner name..." autocomplete="off" class="m-2 input" />
-        <div id="searchRunnerList" class="m-1"></div>
-        <div class="col-xl-10 text-center m-2">
-          <canvas id="myChart"></canvas>
-          <button type="button" class="m-2 btn btn-primary" onclick="theChart.resetZoom()">Reset zoom</button>
+        <div class="container" align="center">
+            <input type="text" id="searchRunner" placeholder="Type runner name..." autocomplete="off"
+                   class="m-2 input"/>
+            <div id="searchRunnerList" class="m-1"></div>
+            <div class="col-xl-10 text-center m-2">
+                <canvas id="myChart"></canvas>
+                <button type="button" class="m-2 btn btn-primary" onclick="theChart.resetZoom()">Reset zoom</button>
 
-          <table class="m-2 table table-striped">
-            <thead>
-            <th scope="col">Name</th>
-            <th scope="col">ELO</th>
-            <th scope="col">Delete</th>
-            </thead>
-            <tbody id="tableBody">
-            </tbody>
-          </table>
+                <table class="m-2 table table-striped">
+                    <thead>
+                    <th scope="col">Name</th>
+                    <th scope="col">ELO</th>
+                    <th scope="col">Delete</th>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
         </div>
-      </div>
 
     </div>
-  </main>
+</main>
+{% include "footer.html" %}
 
-    <script type="text/javascript">
-        Chart.register(Chart.Colors);
-        Chart.register(ChartZoom);
-        theChart = new Chart(document.getElementById('myChart'), {
-            type: 'line',
-            options: {
-                scales: {
-                    x: {
-                        type: 'timestack'
-                    }
+<script type="text/javascript">
+    Chart.register(Chart.Colors);
+    Chart.register(ChartZoom);
+    theChart = new Chart(document.getElementById('myChart'), {
+        type: 'line',
+        options: {
+            scales: {
+                x: {
+                    type: 'timestack'
+                }
+            },
+            plugins: {
+                colors: {
+                    forceOverride: true
                 },
-                plugins: {
-                    colors: {
-                        forceOverride: true
-                    },
+                zoom: {
                     zoom: {
-                        zoom: {
-                            wheel: {
-                                enabled: true,
-                            },
-                            pinch: {
-                                enabled: true
-                            },
-                            mode: 'xy',
-                        }
+                        wheel: {
+                            enabled: true,
+                        },
+                        pinch: {
+                            enabled: true
+                        },
+                        mode: 'xy',
                     }
                 }
             }
-        });
-    </script>
- <script>
+        }
+    });
+</script>
+<script>
     const searchRunner = document.getElementById('searchRunner');
     const searchRunnerList = document.getElementById('searchRunnerList');
     const tableBody = document.getElementById('tableBody');
@@ -171,6 +177,5 @@
     });
 </script>
 
-  {% include "footer.html" %}
-  </body>
+</body>
 </html>

@@ -12,11 +12,11 @@ class PageView(models.Model):
 
 
 class Runner(models.Model):
-    fullname = models.CharField(db_index=True)
+    fullname = models.CharField(db_index=True, max_length=100)
     elo = models.DecimalField(default=1600.0, max_digits=7, decimal_places=2, db_index=True)
     number_of_valid_courses = models.PositiveIntegerField(default=0, db_index=True)
     sex = models.CharField(default="", max_length=1) # TODO replace with enum
-    nationality = models.CharField(default="")
+    nationality = models.CharField(default="", max_length=3)
     category = models.CharField(default="", max_length=5, db_index=True) # TODO replace with only age ? or year of birth
     active = models.BooleanField(default=True, db_index=True)
 
@@ -28,10 +28,10 @@ class Runner(models.Model):
 
 
 class Course(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=200)
     date = models.DateTimeField(db_index=True)
     source_id = models.IntegerField(default=0)
-    location = models.CharField()
+    location = models.CharField(max_length=200)
     status = EnumField(CourseStatus, default=CourseStatus.UNKNOWN)
     source = EnumField(SourceType, default=SourceType.UNKNOWN)
     type = EnumField(CourseType, default=CourseType.UNKNOWN)
@@ -46,7 +46,7 @@ class Course(models.Model):
 
 class Ranking(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    name = models.CharField()
+    name = models.CharField(max_length=100)
     distance = models.IntegerField()
     climb = models.IntegerField(null=True)
 
@@ -65,7 +65,7 @@ class Source(models.Model):
     source_type = EnumField(SourceType, default=SourceType.UNKNOWN)
     ext_runner_id = models.IntegerField(db_index=True)
     runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING, null=True)
-    fullname_in_source = models.CharField(db_index=True, null=True)
+    fullname_in_source = models.CharField(db_index=True, null=True, max_length=100)
 
     def link(self):
         if self.source_type == SourceType.HELGA_WEBRES:
@@ -79,7 +79,7 @@ class Result(models.Model):
     source = models.ForeignKey(Source, on_delete=models.DO_NOTHING, null=True) # remove null = true AFTER migration
     place = models.IntegerField()
     time = models.TimeField(null=True)
-    status = models.CharField()
+    status = models.CharField(max_length=30) # TODO replace with enum
     elo_diff = models.DecimalField(default=0.00, max_digits=7, decimal_places=2)
     new_elo = models.DecimalField(default=0.0, max_digits=7, decimal_places=2)
     startnumber = models.PositiveIntegerField(default=0)
@@ -89,9 +89,9 @@ class Result(models.Model):
 
 
 class Affiliation(models.Model):
-    fede = models.CharField()
-    club = models.CharField(db_index=True)
-    country = models.CharField(db_index=True, null=True)
+    fede = models.CharField(max_length=100)
+    club = models.CharField(db_index=True, max_length=100)
+    country = models.CharField(db_index=True, null=True, max_length=3)
     runner = models.ForeignKey(Runner, on_delete=models.DO_NOTHING, null=True)
 
     def __str__(self):
