@@ -19,6 +19,7 @@ class Runner(models.Model):
     nationality = models.CharField(default="", max_length=3)
     category = models.CharField(default="", max_length=5, db_index=True) # TODO replace with only age ? or year of birth
     active = models.BooleanField(default=True, db_index=True)
+    anonymous = models.BooleanField(default=False)
 
     def flag_emoji(self):
         return get_flag_from_nationality(self.nationality)

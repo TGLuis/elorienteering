@@ -37,7 +37,9 @@
                     {% endif %}
 
                     <td><span class="emoji" aria-label="{{ entry.runner.flag_emoji.aria_label }}">{{ entry.runner.flag_emoji.emoji }}</span>&nbsp;&nbsp;<a
-                            href="/elo/runner?id={{ entry.runner.pk }}">{{ entry.runner.fullname }}</a></td>
+                            href="/elo/runner?id={{ entry.runner.pk }}">
+                        {% if not entry.runner.anonymous %}{{ entry.runner.fullname }}{% endif %}
+                    </a></td>
 
                     {% if entry.runner.number_of_valid_courses < 3 %}
                     <td>?</td>

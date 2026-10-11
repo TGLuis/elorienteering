@@ -224,7 +224,7 @@ def runner_data(request):
 
 def runner_search(request):
     sources = Source.objects.filter(fullname_in_source__icontains=request.GET['runner_pattern'])[:10]
-    return JsonResponse([{"name":source.fullname_in_source,"url":f"/elo/runner?id={source.runner.pk}"} for source in sources], safe=False)
+    return JsonResponse([{"name":source.fullname_in_source,"url":f"/elo/runner?id={source.runner.pk}"} for source in sources if not source.runner.anonymous], safe=False)
 
 
 def runner_compare(request):

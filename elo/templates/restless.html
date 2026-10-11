@@ -44,7 +44,9 @@
                 <tr>
                     <td>{{ runner.place }}</td>
                     <td><span class="emoji" aria-label="{{ runner.nationality }}">{{ runner.flag }}</span>&nbsp;&nbsp;<a
-                            href="/elo/runner?id={{ runner.pk }}">{{ runner.name }}</a></td>
+                            href="/elo/runner?id={{ runner.pk }}">
+                        {% if not runner.anonymous %}{{ runner.name }}{% endif %}
+                    </a></td>
                     <td>{{ runner.count }}</td>
                 </tr>
                 {% endfor %}
