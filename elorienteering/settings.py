@@ -185,6 +185,11 @@ logging.config.dictConfig({
 })
 
 # emails
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "backend@elorienteering.com"
-NOTIFY_EMAIL = "luistascong@yahoo.fr"
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend').upper()
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'backend@elorienteering.com').upper()
+NOTIFY_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'test@test.com').upper()
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'blabla').upper()  # new
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'user').upper()  # new
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'password').upper()
+EMAIL_PORT = 587  # new
+EMAIL_USE_TLS = True  # new
