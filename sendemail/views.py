@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.urls import reverse_lazy
@@ -5,6 +7,7 @@ from django.views.generic import FormView, TemplateView
 
 from .forms import ContactForm
 
+logger = logging.getLogger(__name__)
 
 class SuccessView(TemplateView):
     template_name = "success.html"
@@ -27,6 +30,7 @@ class ContactView(FormView):
             f"________________________\n\n"
             f"{message}"
         )
+        logger.warning(full_message)
         send_mail(
             subject="Elorienteering contactform",
             message=full_message,

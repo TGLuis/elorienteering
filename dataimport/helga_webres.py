@@ -32,11 +32,21 @@ def download_courses():
         if (not os.path.exists(filename)) or (course_id in courses_to_download_ids):
             if course_id in courses_to_download_ids:
                 courses_to_download.filter(source_id=course_id).update(status=CourseStatus.TOIMPORT)
-            with open(filename, "w") as f:
-                response = requests.get(f"https://helga-o.com/webres-api/ws.php?lauf={course_id}")
-                f.write(response.text)
-            pre_process(course_id, filename)
+            download_course(course_id, filename)
             sleep(2)
+
+
+def download_course(course_id, filename: str, retry=0):
+    if retry==3:
+        return
+    response = requests.get(f"https://helga-o.com/webres-api/ws.php?lauf={course_id}")
+    if response.ok:
+        with open(filename, "w") as f:
+            f.write(response.text)
+        pre_process(course_id, filename)
+    else:
+        sleep(30)
+        download_course(course_id, filename, retry=retry+1)
 
 
 def get_courses_ids():
